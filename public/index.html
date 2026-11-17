@@ -986,80 +986,71 @@
   </script>
 
 
+
 <!-- ID_TTS_PATCH_START -->
 <style>
   #sp-player {
-    position: fixed;
-    bottom: 14px;
-    left: 14px;
-    z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    background: rgba(16, 16, 16, 0.94);
-    border: 1px solid rgba(29, 185, 84, 0.55);
-    border-radius: 14px;
-    padding: 9px 12px;
-    color: #fff;
-    font-family: 'Segoe UI', sans-serif;
-    box-shadow: 0 8px 26px rgba(0,0,0,0.65);
-    backdrop-filter: blur(8px);
-    width: 295px;
+    position: fixed !important;
+    bottom: 16px !important;
+    left: 16px !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 7px !important;
+    background: rgba(15, 15, 15, 0.95) !important;
+    border: 2px solid #1db954 !important;
+    border-radius: 16px !important;
+    padding: 10px 12px !important;
+    color: #fff !important;
+    font-family: 'Segoe UI', Arial, sans-serif !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.85) !important;
+    width: 300px !important;
   }
-  .sp-top {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+  .sp-top { display: flex; align-items: center; gap: 10px; }
   #sp-disc {
-    width: 38px;
-    height: 38px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    background: radial-gradient(circle, #1db954 22%, #111 25%, #222 60%, #1db954 100%);
+    background: radial-gradient(circle, #1db954 20%, #111 25%, #222 65%, #1db954 100%);
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
+    border: 2px solid #1db954;
     animation: spSpin 4s linear infinite;
     animation-play-state: paused;
-    border: 2px solid #1db954;
   }
   #sp-disc.playing { animation-play-state: running; }
   @keyframes spSpin { 100% { transform: rotate(360deg); } }
   .sp-info { flex: 1; overflow: hidden; }
-  .sp-badge { font-size: 9px; color: #1db954; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; }
-  #sp-title { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #sp-artist { font-size: 10px; color: #b3b3b3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sp-controls { display: flex; align-items: center; gap: 4px; }
+  #sp-badge { font-size: 10px; color: #1db954; font-weight: 800; text-transform: uppercase; }
+  #sp-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+  #sp-artist { font-size: 11px; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp-controls { display: flex; align-items: center; gap: 5px; }
   .sp-btn {
-    background: #282828;
-    border: none;
+    background: #2a2a2a;
+    border: 1px solid #444;
     color: #fff;
-    width: 25px;
-    height: 25px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .sp-btn.main { background: #1db954; color: #000; font-weight: bold; }
-  #sp-vol { width: 44px; accent-color: #1db954; cursor: pointer; }
-  .sp-search-row {
-    display: flex;
-    gap: 5px;
-  }
+  .sp-btn.main { background: #1db954; color: #000; border: none; font-weight: bold; width: 32px; height: 32px; }
+  .sp-search-row { display: flex; gap: 5px; align-items: center; }
   #sp-search-input {
     flex: 1;
-    background: #242424;
-    border: 1px solid #383838;
+    background: #222;
+    border: 1px solid #444;
     border-radius: 8px;
     color: #fff;
     font-size: 11px;
-    padding: 4px 8px;
+    padding: 5px 8px;
     outline: none;
   }
-  #sp-search-input:focus { border-color: #1db954; }
   #sp-search-btn {
     background: #1db954;
     color: #000;
@@ -1067,73 +1058,57 @@
     border-radius: 8px;
     font-size: 11px;
     font-weight: 700;
-    padding: 4px 8px;
+    padding: 5px 10px;
     cursor: pointer;
   }
-  #yt-hidden-wrap {
-    position: fixed;
-    width: 1px;
-    height: 1px;
-    bottom: -10px;
-    left: -10px;
-    opacity: 0.01;
-    pointer-events: none;
-  }
+  #sp-vol { width: 55px; accent-color: #1db954; cursor: pointer; }
 </style>
 
 <div id="sp-player">
   <div class="sp-top">
     <div id="sp-disc"></div>
     <div class="sp-info">
-      <div class="sp-badge" id="sp-badge">Spotify Hits BGM</div>
-      <div id="sp-title">Sesi Potret (Teh Hijau)</div>
-      <div id="sp-artist">Raim Laode</div>
+      <div id="sp-badge">SPOTIFY HITS AKTIF</div>
+      <div id="sp-title">Memuat Sesi Potret...</div>
+      <div id="sp-artist">Klik tombol Play / Layar</div>
     </div>
     <div class="sp-controls">
       <button class="sp-btn" id="sp-prev" title="Sebelumnya">&#9664;</button>
       <button class="sp-btn main" id="sp-toggle" title="Play/Pause">&#9654;</button>
       <button class="sp-btn" id="sp-next" title="Berikutnya">&#9654;&#9654;</button>
-      <input type="range" id="sp-vol" min="0" max="100" step="5" value="45" title="Volume Musik" />
     </div>
   </div>
   <div class="sp-search-row">
-    <input type="text" id="sp-search-input" placeholder="Ketik lagu / penonton ketik: req judul" />
-    <button id="sp-search-btn">Putar</button>
+    <input type="text" id="sp-search-input" placeholder="Ketik lagu (atau chat: req judul)" />
+    <button id="sp-search-btn">Cari</button>
+    <input type="range" id="sp-vol" min="0" max="1" step="0.05" value="0.6" title="Volume" />
   </div>
 </div>
-<div id="yt-hidden-wrap"><div id="yt-bgm-frame"></div></div>
 
 <script>
 (function() {
-  // Daftar Lagu Hits sesuai permintaan
-  const defaultTracks = [
-    { title: 'Sesi Potret (Teh Hijau)', artist: 'Raim Laode', query: 'Raim Laode Sesi Potret lirik' },
-    { title: 'Training Season', artist: 'Dua Lipa', query: 'Dua Lipa Training Season lyrics' },
-    { title: 'My Heart', artist: 'Irwansyah & Acha Septriasa', query: 'Irwansyah Acha Septriasa My Heart lirik' },
-    { title: 'Kaulah Kamuku', artist: 'Fatin & The Overtunes', query: 'Fatin Kaulah Kamuku lirik' },
-    { title: 'Jikalau Kau Cinta', artist: 'Judika', query: 'Judika Jikalau Kau Cinta lirik' },
-    { title: 'Komang', artist: 'Raim Laode', query: 'Raim Laode Komang lirik' },
-    { title: 'Penjaga Hati', artist: 'Nadhif Basalamah', query: 'Nadhif Basalamah Penjaga Hati lirik' },
-    { title: 'Gala Bunga Matahari', artist: 'Sal Priadi', query: 'Sal Priadi Gala Bunga Matahari lirik' },
-    { title: 'Kupu-Kupu', artist: 'Tiara Andini', query: 'Tiara Andini Kupu Kupu lirik' },
-    { title: 'Tak Segampang Itu', artist: 'Anggi Marito', query: 'Anggi Marito Tak Segampang Itu lirik' },
-    { title: 'Sial', artist: 'Mahalini', query: 'Mahalini Sial lirik' },
-    { title: 'Untungnya, Hidup Harus Tetap Berjalan', artist: 'Bernadya', query: 'Bernadya Untungnya Hidup Harus Tetap Berjalan lirik' }
+  const defaultQueries = [
+    { title: 'Sesi Potret', artist: 'Raim Laode', q: 'Raim Laode Sesi Potret' },
+    { title: 'Training Season', artist: 'Dua Lipa', q: 'Dua Lipa Training Season' },
+    { title: 'My Heart', artist: 'Irwansyah & Acha Septriasa', q: 'Irwansyah Acha Septriasa My Heart' },
+    { title: 'Kaulah Kamuku', artist: 'Fatin & The Overtunes', q: 'Fatin Kaulah Kamuku' },
+    { title: 'Jikalau Kau Cinta', artist: 'Judika', q: 'Judika Jikalau Kau Cinta' },
+    { title: 'Komang', artist: 'Raim Laode', q: 'Raim Laode Komang' },
+    { title: 'Penjaga Hati', artist: 'Nadhif Basalamah', q: 'Nadhif Basalamah Penjaga Hati' },
+    { title: 'Gala Bunga Matahari', artist: 'Sal Priadi', q: 'Sal Priadi Gala Bunga Matahari' },
+    { title: 'Kupu-Kupu', artist: 'Tiara Andini', q: 'Tiara Andini Kupu Kupu' },
+    { title: 'Tak Segampang Itu', artist: 'Anggi Marito', q: 'Anggi Marito Tak Segampang Itu' },
+    { title: 'Sial', artist: 'Mahalini', q: 'Mahalini Sial' },
+    { title: 'Untungnya Hidup Harus Tetap Berjalan', artist: 'Bernadya', q: 'Bernadya Untungnya' }
   ];
 
-  let tracks = [...defaultTracks];
+  let tracks = [...defaultQueries];
   let idx = 0;
-  let userVol = 45; // Skala 0 - 100
-  let isPlaying = false;
-  let mode = 'yt'; // 'yt' atau 'audio'
-
-  const bgmAudio = new Audio();
-  bgmAudio.preload = 'auto';
-
-  let ytPlayer = null;
-  let ytReady = false;
-  let currentVideoList = [];
-  let currentVideoTry = 0;
+  let userVol = 0.6;
+  const bgm = new Audio();
+  bgm.crossOrigin = 'anonymous';
+  bgm.preload = 'auto';
+  bgm.volume = userVol;
 
   const disc = document.getElementById('sp-disc');
   const badgeEl = document.getElementById('sp-badge');
@@ -1146,163 +1121,104 @@
   const searchInput = document.getElementById('sp-search-input');
   const searchBtn = document.getElementById('sp-search-btn');
 
-  function setUIPlaying(playing) {
-    isPlaying = playing;
+  function updateUI(playing) {
     if (playing) {
       disc.classList.add('playing');
       toggleBtn.innerHTML = '&#10074;&#10074;';
+      badgeEl.textContent = 'SEDANG MEMUTAR';
     } else {
       disc.classList.remove('playing');
       toggleBtn.innerHTML = '&#9654;';
+      badgeEl.textContent = 'KLIK PLAY UNTUK MUSIK';
     }
   }
 
-  // Muat YouTube IFrame API
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-
-  window.onYouTubeIframeAPIReady = function() {
-    ytPlayer = new YT.Player('yt-bgm-frame', {
-      height: '1',
-      width: '1',
-      playerVars: { autoplay: 1, controls: 0, rel: 0, playsinline: 1 },
-      events: {
-        onReady: () => {
-          ytReady = true;
-          ytPlayer.setVolume(userVol);
-          loadTrack(0, true);
-        },
-        onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) {
-            setUIPlaying(true);
-          } else if (e.data === YT.PlayerState.ENDED) {
-            loadTrack(idx + 1, true);
-          }
-        },
-        onError: () => {
-          // Jika video pertama kena blokir embed, otomatis pindah ke video hasil pencarian berikutnya
-          currentVideoTry++;
-          if (currentVideoList.length > currentVideoTry && ytReady) {
-            ytPlayer.loadVideoById(currentVideoList[currentVideoTry]);
-          } else {
-            playFallbackItunes(tracks[idx]);
-          }
-        }
-      }
+  function tryPlay() {
+    bgm.play().then(() => {
+      updateUI(true);
+    }).catch(() => {
+      updateUI(false);
     });
-  };
-
-  function playFallbackItunes(track) {
-    mode = 'audio';
-    const q = track.query || (track.title + ' ' + track.artist);
-    fetch('http://localhost:3000/itunes-search?q=' + encodeURIComponent(q))
-      .then(r => r.json())
-      .then(data => {
-        if (data && data.previewUrl) {
-          bgmAudio.src = data.previewUrl;
-          bgmAudio.volume = userVol / 100;
-          if (data.cover) disc.style.backgroundImage = 'url(' + data.cover + ')';
-          bgmAudio.play().then(() => setUIPlaying(true)).catch(() => {});
-        } else {
-          setTimeout(() => loadTrack(idx + 1, true), 1500);
-        }
-      })
-      .catch(() => setTimeout(() => loadTrack(idx + 1, true), 1500));
   }
 
-  function loadTrack(i, autoPlay) {
+  function loadAndPlay(index, autoPlay) {
     if (!tracks.length) return;
-    idx = (i + tracks.length) % tracks.length;
-    const t = tracks[idx];
-    titleEl.textContent = t.title;
-    artistEl.textContent = t.artist;
+    idx = (index + tracks.length) % tracks.length;
+    const item = tracks[idx];
+    titleEl.textContent = item.title;
+    artistEl.textContent = item.artist;
 
-    bgmAudio.pause();
-    if (ytReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
-
-    // Jika lagu berasal dari folder lokal /mp3
-    if (t.url) {
-      mode = 'audio';
-      bgmAudio.src = t.url;
-      bgmAudio.volume = userVol / 100;
-      if (autoPlay) bgmAudio.play().then(() => setUIPlaying(true)).catch(() => {});
+    if (item.url) {
+      bgm.src = item.url;
+      if (item.cover) disc.style.backgroundImage = 'url(' + item.cover + ')';
+      if (autoPlay) tryPlay();
       return;
     }
 
-    // Cari lagu full dari YouTube via server lokal
-    mode = 'yt';
-    const q = t.query || (t.title + ' ' + t.artist);
-    fetch('http://localhost:3000/yt-search?q=' + encodeURIComponent(q))
+    // Langsung ambil stream audio HTTPS resmi dari iTunes Indonesia (tanpa blokir CORS/Mixed Content)
+    const apiUrl = 'https://itunes.apple.com/search?term=' + encodeURIComponent(item.q || item.title) + '&country=ID&media=music&entity=song&limit=3';
+    fetch(apiUrl)
       .then(r => r.json())
       .then(data => {
-        if (data && Array.isArray(data.videoIds) && data.videoIds.length > 0 && ytReady) {
-          currentVideoList = data.videoIds;
-          currentVideoTry = 0;
-          ytPlayer.loadVideoById(currentVideoList[0]);
-          ytPlayer.setVolume(userVol);
+        if (data && data.results && data.results.length > 0) {
+          const hit = data.results[0];
+          item.url = hit.previewUrl;
+          item.title = hit.trackName || item.title;
+          item.artist = hit.artistName || item.artist;
+          item.cover = hit.artworkUrl100 || '';
+
+          titleEl.textContent = item.title;
+          artistEl.textContent = item.artist;
+          if (item.cover) disc.style.backgroundImage = 'url(' + item.cover + ')';
+
+          bgm.src = item.url;
+          if (autoPlay) tryPlay();
         } else {
-          playFallbackItunes(t);
+          setTimeout(() => loadAndPlay(idx + 1, autoPlay), 1000);
         }
       })
-      .catch(() => playFallbackItunes(t));
+      .catch(() => {
+        setTimeout(() => loadAndPlay(idx + 1, autoPlay), 1500);
+      });
   }
 
-  function playCustomQuery(rawQuery, requester) {
-    if (!rawQuery) return;
-    const newTrack = {
-      title: rawQuery,
-      artist: requester ? ('Request @' + requester) : 'Pencarian Lagu',
-      query: rawQuery
+  function requestSong(queryText, requesterName) {
+    if (!queryText) return;
+    const customTrack = {
+      title: queryText,
+      artist: requesterName ? ('Request @' + requesterName) : 'Pencarian Musik',
+      q: queryText
     };
-    tracks.splice(idx + 1, 0, newTrack);
-    badgeEl.textContent = requester ? ('Request: ' + requester) : 'Spotify Hits BGM';
-    loadTrack(idx + 1, true);
+    tracks.splice(idx + 1, 0, customTrack);
+    loadAndPlay(idx + 1, true);
   }
 
   toggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (mode === 'yt' && ytReady && ytPlayer) {
-      if (isPlaying) {
-        ytPlayer.pauseVideo();
-        setUIPlaying(false);
-      } else {
-        ytPlayer.playVideo();
-        setUIPlaying(true);
-      }
-    } else {
-      if (bgmAudio.paused) {
-        bgmAudio.play().then(() => setUIPlaying(true)).catch(() => {});
-      } else {
-        bgmAudio.pause();
-        setUIPlaying(false);
-      }
-    }
+    if (bgm.paused) tryPlay();
+    else { bgm.pause(); updateUI(false); }
   });
 
   nextBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    badgeEl.textContent = 'Spotify Hits BGM';
-    loadTrack(idx + 1, true);
+    loadAndPlay(idx + 1, true);
   });
 
   prevBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    badgeEl.textContent = 'Spotify Hits BGM';
-    loadTrack(idx - 1, true);
+    loadAndPlay(idx - 1, true);
   });
 
   volInput.addEventListener('input', (e) => {
-    userVol = parseInt(e.target.value, 10);
-    bgmAudio.volume = userVol / 100;
-    if (ytReady && ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(userVol);
+    userVol = parseFloat(e.target.value);
+    bgm.volume = userVol;
   });
 
   searchBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const val = searchInput.value.trim();
     if (val) {
-      playCustomQuery(val, '');
+      requestSong(val, '');
       searchInput.value = '';
     }
   });
@@ -1312,54 +1228,45 @@
     if (e.key === 'Enter') {
       const val = searchInput.value.trim();
       if (val) {
-        playCustomQuery(val, '');
+        requestSong(val, '');
         searchInput.value = '';
       }
     }
   });
 
-  bgmAudio.addEventListener('ended', () => loadTrack(idx + 1, true));
+  bgm.addEventListener('ended', () => loadAndPlay(idx + 1, true));
+  bgm.addEventListener('error', () => setTimeout(() => loadAndPlay(idx + 1, true), 1500));
 
-  // Gabungkan lagu lokal di folder mp3 (jika ada)
+  // Cek lagu lokal di folder mp3 jika ada
   fetch('http://localhost:3000/playlist')
     .then(r => r.json())
     .then(localFiles => {
       if (Array.isArray(localFiles) && localFiles.length > 0) {
-        tracks = [...localFiles, ...defaultTracks];
+        tracks = [...localFiles, ...defaultQueries];
       }
+      loadAndPlay(0, true);
     })
-    .catch(() => {});
+    .catch(() => loadAndPlay(0, true));
 
-  // Dengarkan request lagu dari chat penonton Live TikTok (jika memakai socket.io)
+  // Klik di mana saja pada layar langsung menyalakan musik jika sempat tertahan autoplay
+  document.addEventListener('pointerdown', () => {
+    if (bgm.paused && bgm.src) tryPlay();
+  });
+
   try {
     if (window.io) {
-      const reqSocket = window.io('http://localhost:3000');
-      reqSocket.on('song-request', (data) => {
-        if (data && data.query) {
-          playCustomQuery(data.query, data.user || 'Penonton');
-        }
+      const s = window.io('http://localhost:3000');
+      s.on('song-request', (d) => {
+        if (d && d.query) requestSong(d.query, d.user || 'Penonton');
       });
     }
   } catch (e) {}
 
-  document.addEventListener('click', function startOnce() {
-    if (!isPlaying) {
-      if (mode === 'yt' && ytReady && ytPlayer) ytPlayer.playVideo();
-      else bgmAudio.play().catch(() => {});
-    }
-    document.removeEventListener('click', startOnce);
-  });
-
-  // Fungsi Auto-Ducking saat TTS Bahasa Indonesia berbicara
   function duckBgm(duck) {
-    const targetVol = duck ? Math.min(Math.round(userVol * 0.2), 10) : userVol;
-    bgmAudio.volume = targetVol / 100;
-    if (ytReady && ytPlayer && ytPlayer.setVolume) {
-      ytPlayer.setVolume(targetVol);
-    }
+    bgm.volume = duck ? Math.min(userVol * 0.2, 0.1) : userVol;
   }
 
-  // --- BAGIAN 2: SUARA BAHASA INDONESIA + AUTO-DUCKING ---
+  // SUARA BAHASA INDONESIA + AUTO DUCKING
   let currentAudio = null;
   const origSpeak = window.speechSynthesis ? window.speechSynthesis.speak.bind(window.speechSynthesis) : null;
   const origCancel = window.speechSynthesis ? window.speechSynthesis.cancel.bind(window.speechSynthesis) : null;
@@ -1396,33 +1303,22 @@
 
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel = function() {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-      }
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
       duckBgm(false);
       if (origCancel) origCancel();
     };
-
     window.speechSynthesis.speak = function(utterance) {
       if (!utterance || !utterance.text) return;
       const cleanText = toIndonesianText(utterance.text);
       utterance.text = cleanText;
       utterance.lang = 'id-ID';
-
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio = null;
-      }
-
+      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
       const audio = new Audio('http://localhost:3000/tts?text=' + encodeURIComponent(cleanText));
       audio.playbackRate = 1.15;
       currentAudio = audio;
-
       duckBgm(true);
       audio.onended = () => duckBgm(false);
       audio.onerror = () => duckBgm(false);
-
       audio.play().catch(() => {
         duckBgm(false);
         fallbackBrowserSpeak(utterance);
