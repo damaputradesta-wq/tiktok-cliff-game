@@ -2,15 +2,28 @@ const express = require('express');
 const http = require('http');
 const path = require('path');
 const { Server } = require('socket.io');
-const { WebcastPushConnection } = require('tiktok-live-connector');
+const tiktokLib = require('tiktok-live-connector');
+const LiveConnection = tiktokLib.TikTokLiveConnection || tiktokLib.WebcastPushConnection;
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'], credentials: true },
+  allowEIO3: true
+});
+
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  next();
+});
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-const connections = new Map();
+const TARGET_USER = 'ptrgenz';
+let activeConnection = null;
+let isConnecting = false;
+let retryTimer = null;
 
 function mapGiftToChallenge(giftName, coins) {
   const name = (giftName || '').toLowerCase();
@@ -32,79 +45,143 @@ function mapGiftToChallenge(giftName, coins) {
   return 'saw';
 }
 
+function connectTikTokRoom() {
+  if (activeConnection || isConnecting) return;
+  isConnecting = true;
+
+  if (retryTimer) {
+    clearTimeout(retryTimer);
+    retryTimer = null;
+  }
+
+  console.log('[TIKTOK] Mencoba menghubungkan ke Live @' + TARGET_USER + '...');
+  io.emit('status', { state: 'connecting', text: 'Mencari sinyal Live @' + TARGET_USER + '...' });
+
+  const tiktok = new LiveConnection(TARGET_USER, {
+    processInitialData: false,
+    enableExtendedGiftInfo: false,
+    requestPollingIntervalMs: 2000
+  });
+
+  tiktok.connect().then((state) => {
+    isConnecting = false;
+    activeConnection = tiktok;
+    console.log('[SUKSES] TERHUBUNG KE LIVE @' + TARGET_USER + ' (Room ID: ' + state.roomId + ')');
+    io.emit('status', { state: 'connected', text: 'LIVE TERHUBUNG: @' + TARGET_USER });
+  }).catch((err) => {
+    isConnecting = false;
+    activeConnection = null;
+    const msg = (err && err.message) ? err.message : String(err);
+    const is403 = msg.includes('403');
+    const retryMs = is403 ? 20000 : 10000;
+
+    console.log('[BELUM LIVE / GAGAL] @' + TARGET_USER + ' -> ' + msg);
+    io.emit('status', {
+      state: 'waiting',
+      text: 'Menunggu @' + TARGET_USER + ' Live (Cek ulang ' + (retryMs / 1000) + ' dtk)...'
+    });
+
+    retryTimer = setTimeout(() => {
+      retryTimer = null;
+      connectTikTokRoom();
+    }, retryMs);
+  });
+
+  tiktok.on('like', (data) => {
+    const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'user';
+    const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
+    const avatar = data.profilePictureUrl || (data.user && data.user.profilePicture && data.user.profilePicture.url && data.user.profilePicture.url[0]) || '';
+    const likeCount = data.likeCount || 1;
+
+    console.log('[LIKE] @' + uniqueId + ' tap-tap layar!');
+    io.emit('live-event', {
+      kind: 'boost',
+      user: uniqueId,
+      nickname: nickname,
+      avatar: avatar,
+      power: Math.min(likeCount * 3, 35)
+    });
+  });
+
+  tiktok.on('chat', (data) => {
+    const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'user';
+    const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
+    const avatar = data.profilePictureUrl || (data.user && data.user.profilePicture && data.user.profilePicture.url && data.user.profilePicture.url[0]) || '';
+
+    console.log('[CHAT] @' + uniqueId + ': ' + data.comment);
+    io.emit('live-event', {
+      kind: 'chat',
+      user: uniqueId,
+      nickname: nickname,
+      avatar: avatar,
+      comment: data.comment || '',
+      power: 20
+    });
+  });
+
+  tiktok.on('gift', (data) => {
+    const giftType = data.giftType ?? (data.giftDetails && data.giftDetails.giftType) ?? 0;
+    if (giftType === 1 && !data.repeatEnd) return;
+
+    const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'user';
+    const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
+    const avatar = data.profilePictureUrl || (data.user && data.user.profilePicture && data.user.profilePicture.url && data.user.profilePicture.url[0]) || '';
+    const count = data.repeatCount || 1;
+    const diamondCount = data.diamondCount ?? (data.giftDetails && data.giftDetails.diamondCount) ?? 1;
+    const coins = diamondCount * count;
+    const gName = data.giftName || (data.giftDetails && data.giftDetails.giftName) || 'Gift';
+    const giftImg = data.giftPictureUrl || '';
+    const challengeId = mapGiftToChallenge(gName, coins);
+
+    console.log('[GIFT MASUK] @' + uniqueId + ' kirim ' + gName + ' x' + count + ' (' + coins + ' koin)');
+
+    io.emit('live-event', {
+      kind: 'gift',
+      id: challengeId,
+      user: uniqueId,
+      nickname: nickname,
+      avatar: avatar,
+      giftName: gName + (count > 1 ? ' x' + count : ''),
+      giftImg: giftImg,
+      coins: coins,
+      pwr: Math.min(35 + coins * 8, 450)
+    });
+  });
+
+  tiktok.on('streamEnd', () => {
+    activeConnection = null;
+    isConnecting = false;
+    io.emit('status', { state: 'ended', text: 'Live @' + TARGET_USER + ' selesai.' });
+  });
+
+  tiktok.on('disconnected', () => {
+    activeConnection = null;
+    isConnecting = false;
+  });
+}
+
 io.on('connection', (socket) => {
-  socket.on('join-live', (username) => {
-    if (!username) return;
-    const clean = username.replace('@', '').trim().toLowerCase();
-    socket.join(clean);
+  if (activeConnection) {
+    socket.emit('status', { state: 'connected', text: 'LIVE TERHUBUNG: @' + TARGET_USER });
+  } else {
+    socket.emit('status', { state: 'connecting', text: 'Mencari sinyal Live @' + TARGET_USER + '...' });
+    connectTikTokRoom();
+  }
 
-    if (connections.has(clean)) {
-      socket.emit('status', { state: 'connected', text: 'TERHUBUNG KE LIVE @' + clean });
-      return;
+  socket.on('join-live', () => {
+    if (activeConnection) {
+      socket.emit('status', { state: 'connected', text: 'LIVE TERHUBUNG: @' + TARGET_USER });
+    } else {
+      connectTikTokRoom();
     }
-
-    socket.emit('status', { state: 'connecting', text: 'Menghubungkan ke Live @' + clean + '...' });
-    const tiktok = new WebcastPushConnection(clean, { processInitialData: false });
-
-    tiktok.connect().then((state) => {
-      connections.set(clean, tiktok);
-      io.to(clean).emit('status', { state: 'connected', text: 'LIVE REAL AKTIF: @' + clean + ' (Room ' + state.roomId + ')' });
-    }).catch((err) => {
-      socket.emit('status', { state: 'waiting', text: 'Menunggu @' + clean + ' mulai Live di TikTok Studio...' });
-    });
-
-    tiktok.on('like', (data) => {
-      io.to(clean).emit('live-event', {
-        kind: 'boost',
-        user: data.uniqueId,
-        nickname: data.nickname || data.uniqueId,
-        avatar: data.profilePictureUrl || '',
-        power: Math.min((data.likeCount || 1) * 3, 35)
-      });
-    });
-
-    tiktok.on('chat', (data) => {
-      io.to(clean).emit('live-event', {
-        kind: 'chat',
-        user: data.uniqueId,
-        nickname: data.nickname || data.uniqueId,
-        avatar: data.profilePictureUrl || '',
-        comment: data.comment || '',
-        power: 15
-      });
-    });
-
-    tiktok.on('gift', (data) => {
-      if (data.giftType === 1 && !data.repeatEnd) return;
-      const count = data.repeatCount || 1;
-      const coins = (data.diamondCount || 1) * count;
-      const gName = data.giftName || 'Gift';
-      const challengeId = mapGiftToChallenge(gName, coins);
-
-      io.to(clean).emit('live-event', {
-        kind: 'gift',
-        id: challengeId,
-        user: data.uniqueId,
-        nickname: data.nickname || data.uniqueId,
-        avatar: data.profilePictureUrl || '',
-        giftName: gName + (count > 1 ? ' x' + count : ''),
-        giftImg: data.giftPictureUrl || '',
-        coins: coins,
-        pwr: Math.min(35 + coins * 8, 450)
-      });
-    });
-
-    tiktok.on('streamEnd', () => {
-      connections.delete(clean);
-      io.to(clean).emit('status', { state: 'ended', text: 'Siaran Live @' + clean + ' telah berakhir.' });
-    });
   });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log('====================================================');
-  console.log('JEMBATAN GIFT ASLI TIKTOK AKTIF DI PORT ' + PORT);
-  console.log('Biarkan terminal ini terbuka saat kamu Live!');
+  console.log('SERVER PENANGKAP GIFT TIKTOK AKTIF (@' + TARGET_USER + ')');
+  console.log('Link Live Studio: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1');
   console.log('====================================================');
+  connectTikTokRoom();
 });

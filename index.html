@@ -574,6 +574,9 @@
     document.getElementById('btnConnect').onclick = () => connectToTikTok(document.getElementById('tiktokUser').value);
 
     const urlParams = new URLSearchParams(window.location.search);
+    let uParam = urlParams.get('user');
+    if (!uParam || uParam.toLowerCase() === 'ptrgenz') uParam = 'ptrgenz';
+    connectToTikTok(uParam);
     if (urlParams.get('user')) connectToTikTok(urlParams.get('user'));
     if (urlParams.get('live') === '1') {
       uiBottom.classList.add('hidden');
