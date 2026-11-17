@@ -2,1763 +2,1253 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RAJA TEBING PRO - TIKTOK LIVE INTERACTIVE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>MBG Racing Live TikTok - @ptrgenz</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', Inter, system-ui, -apple-system, sans-serif; }
-    body { width: 100vw; height: 100vh; background: radial-gradient(circle at 50% 30%, #0f172a 0%, #020617 100%); display: flex; justify-content: center; align-items: center; overflow: hidden; color: #f8fafc; }
-    #stage { position: relative; width: 100%; max-width: 480px; height: 100vh; background: #050811; overflow: hidden; box-shadow: 0 0 80px rgba(0,0,0,0.95); border-left: 1px solid rgba(148,163,184,0.18); border-right: 1px solid rgba(148,163,184,0.18); }
-    canvas { width: 100%; height: 100%; display: block; }
-
-    /* HUD Atas Elegan & Ringkas */
-    #hud-top {
-      position: absolute; top: 10px; left: 10px; right: 10px;
-      display: flex; justify-content: space-between; gap: 8px;
-      z-index: 20; pointer-events: none;
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #0b1320;
+      font-family: 'Segoe UI', Impact, system-ui, sans-serif;
     }
-    .hud-card {
-      flex: 1; background: rgba(9, 14, 28, 0.72);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px; padding: 7px 11px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    #game-wrap {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at center, #1b2e4b 0%, #09101d 100%);
     }
-    .hud-label { font-size: 9px; font-weight: 800; letter-spacing: 0.8px; color: #94a3b8; text-transform: uppercase; display: flex; align-items: center; gap: 4px; }
-    .hud-label img { width: 11px; height: 11px; }
-    .alt-row { display: flex; align-items: baseline; justify-content: space-between; margin-top: 1px; }
-    .alt-num { font-size: 24px; font-weight: 900; color: #38bdf8; letter-spacing: -0.5px; text-shadow: 0 0 14px rgba(56,189,248,0.45); }
-    .alt-target { font-size: 10px; font-weight: 700; color: #64748b; }
-    .status-line { font-size: 9px; font-weight: 700; color: #34d399; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sultan-line { font-size: 10.5px; font-weight: 800; color: #f8fafc; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .meta-line { font-size: 9.5px; font-weight: 800; color: #cbd5e1; margin-top: 3px; display: flex; justify-content: space-between; }
-
-    /* Menu Harga Gift Mini & Elegan di Pojok Kiri (Tidak Menutupi Layar) */
-    #gift-menu {
-      position: absolute; top: 82px; left: 8px; width: 138px;
-      background: rgba(9, 14, 28, 0.58);
-      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(250, 204, 21, 0.28);
-      border-radius: 10px; padding: 6px 7px;
-      z-index: 20; pointer-events: none;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
-    }
-    .gm-head {
-      font-size: 8.5px; font-weight: 900; color: #fde047;
-      letter-spacing: 0.6px; margin-bottom: 4px; padding-bottom: 3px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex; align-items: center; gap: 4px;
-    }
-    .gm-head img { width: 11px; height: 11px; }
-    .gm-item {
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 9px; padding: 2px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    }
-    .gm-item:last-child { border-bottom: none; }
-    .gm-left { display: flex; align-items: center; gap: 4px; color: #e2e8f0; font-weight: 600; }
-    .gm-left img { width: 12px; height: 12px; object-fit: contain; }
-    .gm-badge { font-size: 8.5px; font-weight: 800; padding: 0.5px 4px; border-radius: 4px; }
-    .b-up { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.4); }
-    .b-dn { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
-
-    /* Live Feed Mini di Pojok Kanan */
-    #live-feed {
-      position: absolute; top: 82px; right: 8px; width: 148px;
-      display: flex; flex-direction: column; gap: 4px;
-      z-index: 20; pointer-events: none;
-    }
-    .feed-pill {
-      background: rgba(9, 14, 28, 0.62);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px; padding: 3px 6px;
-      display: flex; align-items: center; gap: 5px;
-      font-size: 9px; font-weight: 700; color: #f1f5f9;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-    }
-    .feed-pill img { width: 13px; height: 13px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-    .feed-txt { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    /* Notifikasi Toast Gift Elegan di Tengah Atas */
-    #alert-toast {
-      position: absolute; top: 15%; left: 50%;
-      transform: translate(-50%, -15px) scale(0.9);
-      opacity: 0; pointer-events: none; z-index: 25;
-      background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(88, 28, 135, 0.88));
-      backdrop-filter: blur(12px);
-      border: 1.5px solid rgba(250, 204, 21, 0.75);
-      border-radius: 999px; padding: 6px 16px 6px 8px;
-      display: flex; align-items: center; gap: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), 0 0 20px rgba(250, 204, 21, 0.25);
-      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-      max-width: 90%;
-    }
-    #alert-toast.show { transform: translate(-50%, 0) scale(1); opacity: 1; }
-    .toast-icon-wrap {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid rgba(250, 204, 21, 0.5); flex-shrink: 0;
-    }
-    .toast-icon-wrap img { width: 24px; height: 24px; object-fit: contain; }
-    .toast-title { font-size: 11.5px; font-weight: 900; color: #fde047; letter-spacing: 0.4px; }
-    .toast-sub { font-size: 10px; font-weight: 700; color: #f8fafc; }
-
-    /* Tombol Buka/Tutup Panel Kontrol */
-    #toggle-ui {
-      position: absolute; bottom: 8px; right: 8px; z-index: 35;
-      background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(148, 163, 184, 0.35);
-      color: #cbd5e1; border-radius: 99px; padding: 4px 10px;
-      font-size: 9.5px; font-weight: 800; cursor: pointer;
-      backdrop-filter: blur(8px);
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
 
-    /* Panel Kontrol Bawah Ringkas */
-    #ui-bottom {
-      position: absolute; bottom: 8px; left: 8px; right: 8px;
-      background: rgba(9, 14, 28, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      border-radius: 12px; padding: 7px; z-index: 30;
-      backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-      transition: transform 0.25s ease, opacity 0.25s ease;
+    /* TOP BAR PERSIS VIDEO 2 (Menu + Musik + Progress Bar MBG 30.000 m) */
+    #top-hud {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(96vw, 680px);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 100;
     }
-    #ui-bottom.hidden { transform: translateY(120%); opacity: 0; pointer-events: none; }
-    .row { display: flex; gap: 5px; margin-bottom: 5px; align-items: center; }
-    .inp { flex: 1; background: rgba(2, 6, 23, 0.9); border: 1px solid #38bdf8; color: #fff; padding: 5px 9px; border-radius: 7px; font-size: 11px; font-weight: 600; outline: none; }
-    .btn { border: none; border-radius: 7px; padding: 6px 8px; font-weight: 800; font-size: 10px; cursor: pointer; color: #fff; display: flex; align-items: center; justify-content: center; gap: 4px; transition: filter 0.15s, transform 0.08s; }
-    .btn:active { transform: scale(0.96); }
-    .btn:hover { filter: brightness(1.15); }
-    .btn img { width: 13px; height: 13px; object-fit: contain; }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+    .hud-pill-btn {
+      background: linear-gradient(180deg, #fffdf5 0%, #dcd5c5 100%);
+      border: 2px solid #4a5568;
+      border-radius: 14px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #1a202c;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #2d3748, 0 4px 10px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .hud-pill-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2d3748; }
+
+    #progress-container {
+      position: relative;
+      flex: 1;
+      height: 24px;
+      background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      border: 2.5px solid #cbd5e1;
+      border-radius: 99px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 2px 5px rgba(0,0,0,0.8);
+      overflow: visible;
+    }
+    #progress-fill {
+      height: 100%;
+      width: 10%;
+      background: linear-gradient(90deg, #22c55e 0%, #3b82f6 60%, #60a5fa 100%);
+      border-radius: 99px;
+      transition: width 0.15s linear;
+    }
+    #progress-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+      text-shadow: 0 1px 3px #000, 0 0 6px #000;
+      letter-spacing: 0.5px;
+    }
+    #progress-truck-icon {
+      position: absolute;
+      top: -11px;
+      left: 0%;
+      transform: translateX(-50%);
+      font-size: 22px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+      transition: left 0.15s linear;
+      pointer-events: none;
+    }
+    #progress-flag {
+      position: absolute;
+      right: -6px;
+      top: -10px;
+      font-size: 22px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+    }
+
+    /* COUNTER FINISH & DEATH + STATUS LIVE (GAYA VIDEO 1) */
+    #score-hud {
+      position: fixed;
+      top: 44px;
+      right: 16px;
+      z-index: 95;
+      text-align: right;
+      color: #fff;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+      pointer-events: none;
+    }
+    #score-hud .finish-row { font-size: 20px; font-weight: 900; color: #facc15; }
+    #score-hud .death-row { font-size: 16px; font-weight: 800; color: #f87171; }
+    #live-status-badge {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 800;
+      background: rgba(22, 163, 74, 0.85);
+      border: 1px solid #4ade80;
+      color: #fff;
+    }
+
+    /* ANTREAN KOMBO AKTIF KIRI ATAS (PERSIS VIDEO 2) */
+    #combo-stack {
+      position: fixed;
+      top: 48px;
+      left: 16px;
+      z-index: 95;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      pointer-events: none;
+    }
+    .combo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.78);
+      border: 1.5px solid rgba(250, 204, 21, 0.7);
+      border-radius: 10px;
+      padding: 3px 9px;
+      color: #fde047;
+      font-size: 14px;
+      font-weight: 900;
+      text-shadow: 0 2px 4px #000;
+      animation: popIn 0.2s ease-out;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* SIDEBAR KAPSUL "TURUN" (KIRI) & "NAIK" (KANAN) PERSIS VIDEO 1 */
+    .gift-column {
+      position: fixed;
+      top: 125px;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 155px;
+      pointer-events: auto;
+    }
+    #col-turun { left: 12px; align-items: flex-start; }
+    #col-naik { right: 12px; align-items: flex-end; }
+
+    .col-header {
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      padding: 2px 10px;
+      border-radius: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+      color: #fff;
+    }
+    #col-turun .col-header { background: rgba(220, 38, 38, 0.85); border: 1.5px solid #fca5a5; }
+    #col-naik .col-header { background: rgba(22, 163, 74, 0.85); border: 1.5px solid #86efac; }
+
+    .gift-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.92);
+      border: 2px solid #f43f5e;
+      border-radius: 99px;
+      padding: 4px 10px;
+      color: #0f172a;
+      font-size: 11.5px;
+      font-weight: 800;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+      cursor: pointer;
+      transition: transform 0.12s;
+    }
+    .gift-pill:hover { transform: scale(1.06); }
+    #col-naik .gift-pill { border-color: #22c55e; flex-direction: row-reverse; }
+    .gift-pill .g-icon { font-size: 16px; }
+    .gift-pill .g-coin {
+      font-size: 10px;
+      color: #fff;
+      background: #e11d48;
+      padding: 1px 6px;
+      border-radius: 99px;
+    }
+    #col-naik .gift-pill .g-coin { background: #16a34a; }
+
+    /* SUBTITLE / NARASI TENGAH BAWAH PERSIS VIDEO 2 */
+    #live-subtitle {
+      position: fixed;
+      bottom: 96px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 98;
+      text-align: center;
+      pointer-events: none;
+      width: 92vw;
+    }
+    .sub-line1 {
+      display: inline-block;
+      font-size: clamp(18px, 3vw, 28px);
+      font-weight: 900;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 10px rgba(0,0,0,0.85);
+      letter-spacing: 0.8px;
+    }
+    .sub-highlight {
+      color: #ff2a85;
+    }
+
+    /* MEME OVERLAY SAAT KENA METEOR / MINUS JAUH (PERSIS VIDEO 2) */
+    #meme-popup {
+      position: fixed;
+      top: 14%;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      z-index: 120;
+      width: 170px;
+      height: 170px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 3px solid #38bdf8;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.8);
+      transition: transform 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      pointer-events: none;
+    }
+    #meme-popup.show { transform: translateX(-50%) scale(1); }
+    #meme-popup .meme-face { font-size: 74px; line-height: 1; }
+    #meme-popup .meme-caption {
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #facc15;
+      text-align: center;
+      padding: 0 6px;
+    }
+
+    /* 3 PEDAL BAWAH PERSIS VIDEO 2 ([SPASI] STOP | RPM | [SPASI] AUTO) */
+    #bottom-pedals {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .pedal-box {
+      width: 66px;
+      height: 68px;
+      background: linear-gradient(180deg, #475569 0%, #1e293b 100%);
+      border: 2.5px solid #cbd5e1;
+      border-radius: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 4px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #0f172a, 0 6px 14px rgba(0,0,0,0.6);
+      color: #fff;
+    }
+    .pedal-box.active {
+      border-color: #4ade80;
+      box-shadow: 0 2px 0 #0f172a, 0 0 15px rgba(74, 222, 128, 0.6);
+      transform: translateY(2px);
+    }
+    .pedal-box.brake.active {
+      border-color: #f87171;
+      box-shadow: 0 2px 0 #0f172a, 0 0 15px rgba(248, 113, 113, 0.6);
+    }
+    .pedal-grid {
+      width: 38px;
+      height: 26px;
+      background: repeating-linear-gradient(90deg, #0f172a, #0f172a 4px, #64748b 4px, #64748b 8px);
+      border-radius: 5px;
+      border: 1px solid #94a3b8;
+    }
+    .pedal-label {
+      font-size: 9px;
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.1;
+      color: #f8fafc;
+    }
+    #gauge-circle {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0f172a 55%, #334155 100%);
+      border: 3px solid #cbd5e1;
+      box-shadow: 0 5px 14px rgba(0,0,0,0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    #gauge-speed { font-size: 16px; font-weight: 900; color: #38bdf8; }
+    #gauge-unit { font-size: 9px; font-weight: 800; color: #94a3b8; }
+
+    /* DRAWER SPOTIFY FULL TRACK (Bisa dibuka/tutup lewat tombol ?? di kiri atas) */
+    #sp-player {
+      position: fixed;
+      top: 46px;
+      left: 16px;
+      z-index: 200;
+      width: 295px;
+      background: rgba(15, 18, 25, 0.96);
+      border: 2px solid #1db954;
+      border-radius: 16px;
+      padding: 10px 12px;
+      color: #fff;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    #sp-player.minimized {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-12px) scale(0.95);
+    }
+    .sp-top { display: flex; align-items: center; gap: 9px; }
+    #sp-disc-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #1db954;
+      flex-shrink: 0;
+      background: #111;
+    }
+    #yt-bgm-frame { width: 44px; height: 44px; border: none; pointer-events: none; transform: scale(1.35); }
+    .sp-info { flex: 1; overflow: hidden; }
+    .sp-badge-row { display: flex; justify-content: space-between; font-size: 9.5px; font-weight: 800; color: #1db954; }
+    #sp-title { font-size: 12.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #sp-artist { font-size: 10.5px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sp-progress-bg { width: 100%; height: 4px; background: #27272a; border-radius: 99px; overflow: hidden; }
+    #sp-progress-fill { width: 0%; height: 100%; background: #1db954; }
+    .sp-controls { display: flex; gap: 4px; align-items: center; }
+    .sp-btn {
+      width: 26px; height: 26px; border-radius: 50%; border: 1px solid #3f3f46;
+      background: #27272a; color: #fff; cursor: pointer; font-size: 10px;
+    }
+    .sp-btn.main { background: #1db954; color: #000; border: none; font-weight: 900; width: 30px; height: 30px; }
+    .sp-search-row { display: flex; gap: 5px; align-items: center; }
+    #sp-search-input {
+      flex: 1; background: #18181b; border: 1px solid #3f3f46; border-radius: 7px;
+      color: #fff; font-size: 11px; padding: 4px 7px; outline: none;
+    }
+    #sp-search-btn {
+      background: #1db954; color: #000; border: none; border-radius: 7px;
+      font-size: 11px; font-weight: 800; padding: 4px 8px; cursor: pointer;
+    }
+    #sp-vol { width: 46px; accent-color: #1db954; }
   </style>
 </head>
 <body>
-  <!-- PRO_ELEGANT_1794887401525 -->
-  <div id="stage">
-    <canvas id="gameCanvas" width="480" height="900"></canvas>
+  <div id="game-wrap">
+    <canvas id="gameCanvas"></canvas>
+  </div>
 
-    <!-- HUD Atas -->
-    <div id="hud-top">
-      <div class="hud-card">
-        <div class="hud-label">
-          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f3d4.png" alt="" />
-          <span>KETINGGIAN PANJAT</span>
-        </div>
-        <div class="alt-row">
-          <span class="alt-num" id="uiAlt">85 m</span>
-          <span class="alt-target">/ 1000 m</span>
-        </div>
-        <div class="status-line" id="uiStatus">SIAP MENERIMA GIFT LIVE</div>
-      </div>
-
-      <div class="hud-card">
-        <div class="hud-label" style="color:#fde047">
-          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f451.png" alt="" />
-          <span>TOP SULTAN PENGGANGGU</span>
-        </div>
-        <div class="sultan-line" id="uiTop1">1. Menunggu Gift...</div>
-        <div class="meta-line">
-          <span style="color:#4ade80">MENANG: <b id="uiWins">0x</b></span>
-          <span style="color:#38bdf8">SHIELD: <b id="uiShield">40%</b></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Menu Harga Gift Super Ringkas (Kiri) -->
-    <div id="gift-menu">
-      <div class="gm-head">
-        <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f381.png" alt="" />
-        <span>MENU GIFT LIVE</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/2764.png" alt="" /><span>Tap / Komen</span></div>
-        <span class="gm-badge b-up">+20m</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f339.png" alt="" /><span>Mawar (1c)</span></div>
-        <span class="gm-badge b-dn">-45m</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f9ca.png" alt="" /><span>Es Krim (2c)</span></div>
-        <span class="gm-badge b-dn">-50m</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/26a1.png" alt="" /><span>Jari Hati (5c)</span></div>
-        <span class="gm-badge b-dn">-55m</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4a3.png" alt="" /><span>Rosa/Bom (10c)</span></div>
-        <span class="gm-badge b-dn">-85m</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f528.png" alt="" /><span>Parfum (20c)</span></div>
-        <span class="gm-badge b-dn">-95m</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f369.png" alt="" /><span>Donat (30c)</span></div>
-        <span class="gm-badge b-dn">-120m</span>
-      </div>
-      <div class="gm-item">
-        <div class="gm-left"><img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f981.png" alt="" /><span>Sultan (100c+)</span></div>
-        <span class="gm-badge b-dn">-180m</span>
-      </div>
-    </div>
-
-    <!-- Live Feed Ringkas (Kanan) -->
-    <div id="live-feed"></div>
-
-    <!-- Banner Toast Elegan -->
-    <div id="alert-toast">
-      <div class="toast-icon-wrap"><img id="toastImg" src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f981.png" alt="" /></div>
-      <div>
-        <div class="toast-title" id="toastTitle">TANTANGAN AKTIF</div>
-        <div class="toast-sub" id="toastSub">@user mengirim gift</div>
-      </div>
-    </div>
-
-    <!-- Tombol Sembunyikan/Tampilkan Panel -->
-    <button id="toggle-ui">Sembunyikan Panel</button>
-
-    <!-- Panel Kontrol Bawah -->
-    <div id="ui-bottom">
-      <div class="row">
-        <input class="inp" id="tiktokUser" placeholder="Ketik @username TikTok lalu klik Hubungkan..." />
-        <button class="btn" style="background:#0284c7" id="btnConnect">HUBUNGKAN</button>
-        <button class="btn" style="background:#334155" id="btnSim">BOT: MATI</button>
-      </div>
-      <div class="grid" id="btnGrid"></div>
+  <!-- TOP HUD PERSIS VIDEO 2 -->
+  <div id="top-hud">
+    <button class="hud-pill-btn" id="btn-toggle-ui" title="Tampilkan/Sembunyikan Daftar Gift">Menu</button>
+    <button class="hud-pill-btn" id="btn-toggle-music" title="Buka/Tutup Spotify Lagu">??</button>
+    <div id="progress-container">
+      <div id="progress-fill"></div>
+      <div id="progress-truck-icon">??</div>
+      <div id="progress-text">0 m / 30.000 m</div>
+      <div id="progress-flag">??</div>
     </div>
   </div>
 
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <!-- SCORE & STATUS KANAN ATAS PERSIS VIDEO 1 -->
+  <div id="score-hud">
+    <div class="finish-row">?? Finish <span id="val-finish">0</span>/100</div>
+    <div class="death-row">?? Gagal: <span id="val-death">0</span></div>
+    <div id="live-status-badge">Menghubungkan @ptrgenz...</div>
+  </div>
+
+  <!-- STACK KOMBO KIRI ATAS PERSIS VIDEO 2 -->
+  <div id="combo-stack"></div>
+
+  <!-- KOLOM KIRI: TURUN / MUNDUR (Klik untuk Tes Langsung) -->
+  <div id="col-turun" class="gift-column">
+    <div class="col-header">TURUN</div>
+    <div class="gift-pill" data-dir="down" data-type="angkot" data-label="Angkot Biru" data-power="95">
+      <span class="g-icon">??</span><span>Mawar (Angkot)</span><span class="g-coin">1c</span>
+    </div>
+    <div class="gift-pill" data-dir="down" data-type="kaki" data-label="Kaki Raksasa" data-power="140">
+      <span class="g-icon">??</span><span>Es Krim (Kaki)</span><span class="g-coin">2c</span>
+    </div>
+    <div class="gift-pill" data-dir="down" data-type="soundhoreg" data-label="Truk Sound Horeg" data-power="260">
+      <span class="g-icon">??</span><span>Rosa (SoundHoreg)</span><span class="g-coin">10c</span>
+    </div>
+    <div class="gift-pill" data-dir="down" data-type="kameha" data-label="Laser Kamehameha" data-power="380">
+      <span class="g-icon">?</span><span>Beruang (Luffy/Goku)</span><span class="g-coin">20c</span>
+    </div>
+    <div class="gift-pill" data-dir="down" data-type="ufo" data-label="UFO Alien" data-power="520">
+      <span class="g-icon">??</span><span>Donat (UFO)</span><span class="g-coin">30c</span>
+    </div>
+    <div class="gift-pill" data-dir="down" data-type="meteor" data-label="Meteor Api Raksasa" data-power="900">
+      <span class="g-icon">??</span><span>Sultan (Meteor)</span><span class="g-coin">100c</span>
+    </div>
+  </div>
+
+  <!-- KOLOM KANAN: NAIK / MAJU (Klik untuk Tes Langsung) -->
+  <div id="col-naik" class="gift-column">
+    <div class="col-header">NAIK</div>
+    <div class="gift-pill" data-dir="up" data-type="tap" data-label="Dorongan Warga" data-power="35">
+      <span class="g-icon">??</span><span>Tap / Komen</span><span class="g-coin">Free</span>
+    </div>
+    <div class="gift-pill" data-dir="up" data-type="kopdes" data-label="Truk Kopdes" data-power="180">
+      <span class="g-icon">??</span><span>Kalung (Kopdes)</span><span class="g-coin">5c</span>
+    </div>
+    <div class="gift-pill" data-dir="up" data-type="jet" data-label="Turbo Jet MBG" data-power="450">
+      <span class="g-icon">??</span><span>Roket (Turbo MBG)</span><span class="g-coin">30c</span>
+    </div>
+  </div>
+
+  <!-- MEME POPUP SAAT KENA METEOR / MUNDUR JAUH -->
+  <div id="meme-popup">
+    <div class="meme-face">??</div>
+    <div class="meme-caption">YAAH KENA METEOR LAGI!</div>
+  </div>
+
+  <!-- SUBTITLE BAWAH PERSIS VIDEO 2 -->
+  <div id="live-subtitle">
+    <div class="sub-line1" id="sub-text">MISI NGANTERIN <span class="sub-highlight">MBG</span> SAMPAI KE SEKOLAH!</div>
+  </div>
+
+  <!-- 3 PEDAL BAWAH PERSIS VIDEO 2 -->
+  <div id="bottom-pedals">
+    <div class="pedal-box brake" id="pedal-stop">
+      <div class="pedal-grid"></div>
+      <div class="pedal-label">[SPASI]<br/>STOP</div>
+    </div>
+    <div id="gauge-circle">
+      <div id="gauge-speed">45</div>
+      <div id="gauge-unit">KM/H</div>
+    </div>
+    <div class="pedal-box active" id="pedal-auto">
+      <div class="pedal-grid"></div>
+      <div class="pedal-label">[SPASI]<br/>AUTO</div>
+    </div>
+  </div>
+
+  <!-- SPOTIFY FULL LAGU WIDGET -->
+  <div id="sp-player">
+    <div class="sp-top">
+      <div id="sp-disc-wrap"><div id="yt-bgm-frame"></div></div>
+      <div class="sp-info">
+        <div class="sp-badge-row">
+          <span id="sp-badge">SPOTIFY FULL</span>
+          <span id="sp-time">00:00 / 00:00</span>
+        </div>
+        <div id="sp-title">Sesi Potret (Teh Hijau)</div>
+        <div id="sp-artist">Raim Laode</div>
+      </div>
+      <div class="sp-controls">
+        <button class="sp-btn" id="sp-prev">&#9664;</button>
+        <button class="sp-btn main" id="sp-toggle">&#9654;</button>
+        <button class="sp-btn" id="sp-next">&#9654;&#9654;</button>
+      </div>
+    </div>
+    <div class="sp-progress-bg"><div id="sp-progress-fill"></div></div>
+    <div class="sp-search-row">
+      <input type="text" id="sp-search-input" placeholder="Ketik lagu / chat: req judul" />
+      <button id="sp-search-btn">Putar</button>
+      <input type="range" id="sp-vol" min="0" max="100" step="5" value="60" />
+    </div>
+  </div>
+
   <script>
-  (function () {
+  (function() {
+    // ========================================================================
+    // A. MESIN GAME "MBG HILL CLIMB RACING" (PERSIS VIDEO 2 + HUD VIDEO 1)
+    // ========================================================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    const SPRITE_URLS = {
-      rose: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f339.png',
-      donut: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f369.png',
-      bolt: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/26a1.png',
-      ice: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f9ca.png',
-      bomb: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4a3.png',
-      hammer: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f528.png',
-      ufo: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f6f8.png',
-      lion: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f981.png',
-      meteor: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/2604.png',
-      rocket: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f680.png',
-      crown: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f451.png'
-    };
-
-    const sprites = {};
-    Object.keys(SPRITE_URLS).forEach((k) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = SPRITE_URLS[k];
-      sprites[k] = img;
-    });
-
-    const imageCache = {};
-    function getExternalImage(url) {
-      if (!url) return null;
-      if (imageCache[url]) return imageCache[url];
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = url;
-      imageCache[url] = img;
-      return img;
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    // Toggle Panel Bawah
-    const uiBottom = document.getElementById('ui-bottom');
-    const toggleBtn = document.getElementById('toggle-ui');
-    toggleBtn.onclick = () => {
-      const isHidden = uiBottom.classList.toggle('hidden');
-      toggleBtn.textContent = isHidden ? 'Tampilkan Panel' : 'Sembunyikan Panel';
-      toggleBtn.style.opacity = isHidden ? '0.45' : '1';
-    };
+    const GOAL_DIST = 30000;
+    let dist = 0;          // Posisi meter (bisa minus seperti di Video 1 & 2)
+    let vel = 2.8;         // Kecepatan berjalan otomatis
+    let autoGas = true;
+    let finishCount = 0;
+    let deathCount = 0;
+    let wheelAngle = 0;
+    let shakeTime = 0;
 
-    // Audio Synthesizer & TTS
-    let audioCtx = null;
-    function playSfx(f1, f2, dur, type) {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const t = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        osc.type = type || 'sawtooth';
-        osc.frequency.setValueAtTime(f1, t);
-        osc.frequency.exponentialRampToValueAtTime(f2, t + dur);
-        g.gain.setValueAtTime(0.11, t);
-        g.gain.linearRampToValueAtTime(0.01, t + dur);
-        osc.connect(g); g.connect(audioCtx.destination);
-        osc.start(t); osc.stop(t + dur);
-      } catch (e) {}
-    }
-
-    function speakId(text) {
-      try {
-        if (!window.speechSynthesis || window.speechSynthesis.speaking) return;
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = 'id-ID';
-        u.rate = 1.22;
-        window.speechSynthesis.speak(u);
-      } catch (e) {}
-    }
-
-    // State Game
-    let alt = 85, targetAlt = 85, wins = 0, shield = 40, shake = 0, flash = 0, lavaY = 54, frame = 0;
-    let simBotActive = false;
-    let toastTimer = null;
-
-    const scores = {};
-    const hazards = [];
+    // Daftar unit yang sedang mendorong maju / mundur di jalan
+    const activeUnits = [];
+    // Partikel asap, api meteor, dan koin
     const particles = [];
-    const embers = [];
-    const popups = [];
 
-    const hero = { x: 240, y: 500, tx: 240, phase: 0, jetpack: 0, freeze: 0, bomb: null, hurt: 0 };
-    const stars = Array.from({ length: 65 }, () => ({ x: Math.random() * 480, y: Math.random() * 900, s: Math.random() * 2 + 0.6, a: 0.3 + Math.random() * 0.7 }));
-    const rockHolds = Array.from({ length: 18 }, (_, i) => ({
-      x: 135 + Math.random() * 175,
-      y: i * 52,
-      w: 38 + Math.random() * 42,
-      h: 12 + Math.random() * 6,
-      crystal: Math.random() > 0.75
-    }));
+    const progFill = document.getElementById('progress-fill');
+    const progTruck = document.getElementById('progress-truck-icon');
+    const progText = document.getElementById('progress-text');
+    const valFinish = document.getElementById('val-finish');
+    const valDeath = document.getElementById('val-death');
+    const subText = document.getElementById('sub-text');
+    const comboStack = document.getElementById('combo-stack');
+    const memePopup = document.getElementById('meme-popup');
+    const pedalStop = document.getElementById('pedal-stop');
+    const pedalAuto = document.getElementById('pedal-auto');
+    const gaugeSpeed = document.getElementById('gauge-speed');
 
-    for (let i = 0; i < 22; i++) {
-      embers.push({ x: 100 + Math.random() * 280, y: Math.random() * 900, vy: 0.6 + Math.random() * 1.2, r: 1.5 + Math.random() * 2 });
+    function setSubtitle(normalWords, highlightWords) {
+      subText.innerHTML = normalWords + ' <span class="sub-highlight">' + highlightWords + '</span>';
     }
 
-    function showToast(title, sub, imgSrc) {
-      const el = document.getElementById('alert-toast');
-      document.getElementById('toastTitle').textContent = title;
-      document.getElementById('toastSub').textContent = sub;
-      document.getElementById('toastImg').src = imgSrc || SPRITE_URLS.lion;
-      el.classList.add('show');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.classList.remove('show'), 2300);
+    function triggerMeme(caption) {
+      memePopup.querySelector('.meme-caption').textContent = caption || 'YAAH MUNDUR JAUH!';
+      memePopup.classList.add('show');
+      clearTimeout(window.__memeTimer);
+      window.__memeTimer = setTimeout(() => memePopup.classList.remove('show'), 2800);
     }
 
-    function pushFeed(text, color, imgSrc) {
-      const wrap = document.getElementById('live-feed');
-      const pill = document.createElement('div');
-      pill.className = 'feed-pill';
-      pill.style.borderLeft = '2.5px solid ' + color;
-      const img = document.createElement('img');
-      img.src = imgSrc || SPRITE_URLS.rocket;
-      const span = document.createElement('div');
-      span.className = 'feed-txt';
-      span.style.color = color;
-      span.textContent = text;
-      pill.appendChild(img);
-      pill.appendChild(span);
-      wrap.prepend(pill);
-      if (wrap.children.length > 4) wrap.lastChild.remove();
+    // Fungsi tinggi permukaan jalan berbukit (Hill Climb curve)
+    function getRoadY(worldX, baseH) {
+      return baseH
+        + Math.sin(worldX * 0.0028) * 52
+        + Math.cos(worldX * 0.0012) * 34
+        + Math.sin(worldX * 0.0065) * 14;
     }
 
-    function spawnExplosion(x, y, color, count) {
-      for (let i = 0; i < (count || 22); i++) {
-        const a = Math.random() * Math.PI * 2, s = Math.random() * 7 + 1.5;
-        particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, r: Math.random() * 4 + 1.5, color, life: 1 });
-      }
+    function getRoadSlope(worldX) {
+      const y1 = getRoadY(worldX - 10, 0);
+      const y2 = getRoadY(worldX + 10, 0);
+      return Math.atan2(y2 - y1, 20);
     }
 
-    function addPopup(x, y, txt, color) {
-      popups.push({ x, y, txt, color, life: 1 });
-    }
+    // Spawn Unit Interaktif (Angkot, Sound Horeg, Truk Kopdes, UFO, Kameha, Meteor)
+    function spawnLiveUnit(ev) {
+      const dir = ev.dir || 'down';
+      const type = ev.type || 'angkot';
+      const sender = ev.nickname || ev.user || 'Penonton';
+      const power = Number(ev.power) || 120;
+      const count = ev.count || 1;
 
-    function updateHud() {
-      document.getElementById('uiAlt').textContent = Math.floor(alt) + ' m';
-      document.getElementById('uiWins').textContent = wins + 'x';
-      document.getElementById('uiShield').textContent = Math.round(shield) + '%';
-      const top = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
-      if (top) {
-        document.getElementById('uiTop1').textContent = '1. @' + top[0] + ' (-' + Math.round(top[1]) + 'm)';
-      }
-    }
-
-    function damageHero(dmg, reason) {
-      if (shield > 0) {
-        const absorbed = Math.min(shield, dmg);
-        shield -= absorbed;
-        dmg -= absorbed;
-        addPopup(hero.x, hero.y - 45, 'SHIELD -' + Math.round(absorbed), '#38bdf8');
-      }
-      if (dmg > 0) {
-        targetAlt = Math.max(0, targetAlt - dmg);
-        hero.hurt = 22;
-        shake = Math.min(28, 10 + dmg / 6);
-        flash = 0.35;
-        playSfx(160, 42, 0.32, 'square');
-        addPopup(hero.x, hero.y - 20, '-' + Math.round(dmg) + 'm (' + reason + ')', '#f87171');
-      }
-      updateHud();
-    }
-
-    function triggerBoost(user, pwr, avatarUrl) {
-      targetAlt = Math.min(1000, targetAlt + pwr);
-      hero.jetpack = 40;
-      hero.freeze = 0;
-      shield = Math.min(100, shield + 12);
-      if (hero.bomb) {
-        hero.bomb.hp--;
-        if (hero.bomb.hp <= 0) {
-          hero.bomb = null;
-          addPopup(hero.x, hero.y - 55, 'BOM DIJINAKKAN!', '#4ade80');
-        }
-      }
-      playSfx(260, 740, 0.22, 'sawtooth');
-      spawnExplosion(hero.x, hero.y + 30, '#38bdf8', 16);
-      addPopup(hero.x, hero.y - 28, '+' + pwr + 'm NITRO', '#34d399');
-      pushFeed('@' + user + ' +' + pwr + 'm', '#6ee7b7', avatarUrl || SPRITE_URLS.rocket);
-      updateHud();
-    }
-
-    const GIFT_CATALOG = [
-      { id: 'saw', sprite: 'rose', gift: 'Mawar', title: 'GERGAJI BAJA', pwr: 45 },
-      { id: 'donut', sprite: 'donut', gift: 'Donat', title: 'DONAT RAKSASA', pwr: 70 },
-      { id: 'bolt', sprite: 'bolt', gift: 'Jari Hati', title: 'PETIR LASER', pwr: 55 },
-      { id: 'ice', sprite: 'ice', gift: 'Es Krim', title: 'ES PEMBEKU', pwr: 50 },
-      { id: 'bomb', sprite: 'bomb', gift: 'Bom Waktu', title: 'BOM TEMPEL', pwr: 85 },
-      { id: 'hammer', sprite: 'hammer', gift: 'Palu Thor', title: 'PALU THOR', pwr: 95 },
-      { id: 'ufo', sprite: 'ufo', gift: 'Roket UFO', title: 'LASER UFO', pwr: 120 },
-      { id: 'meteor', sprite: 'lion', gift: 'Singa Sultan', title: 'KIAMAT METEOR', pwr: 180 }
-    ];
-
-    function triggerChallenge(payload) {
-      const base = GIFT_CATALOG.find((g) => g.id === payload.id) || GIFT_CATALOG[0];
-      const u = payload.user || 'Penonton';
-      const giftLabel = payload.giftName || base.gift;
-      const pwr = payload.pwr || base.pwr;
-      const customGiftImg = getExternalImage(payload.giftImg);
-      const avatarImg = getExternalImage(payload.avatar);
-      const iconUrl = payload.giftImg || SPRITE_URLS[base.sprite];
-
-      scores[u] = (scores[u] || 0) + pwr;
-      updateHud();
-
-      showToast(base.title + ' (-' + pwr + 'm)', '@' + u + ' mengirim ' + giftLabel, iconUrl);
-      pushFeed('@' + u + ': ' + giftLabel + ' (-' + pwr + 'm)', '#fca5a5', payload.avatar || iconUrl);
-
-      playSfx(520, 880, 0.28, 'triangle');
-      speakId(u + ' mengirim ' + giftLabel + ', ' + base.title);
-
-      if (base.id === 'saw' || base.id === 'donut') {
-        for (let i = 0; i < 3; i++) {
-          hazards.push({
-            kind: base.id,
-            sprite: customGiftImg || sprites[base.sprite],
-            avatar: avatarImg,
-            x: 155 + Math.random() * 170,
-            y: -45 - i * 82,
-            vx: (i % 2 === 0 ? 4.8 : -4.8),
-            vy: 6.8,
-            r: base.id === 'donut' ? 28 : 25,
-            rot: 0,
-            user: u,
-            pwr: pwr * 0.5
+      if (type === 'tap' || type === 'chat') {
+        vel = Math.min(vel + 2.6, 14);
+        setSubtitle('@' + sender.toUpperCase(), 'BANTU DORONG MBG MAJU!');
+        for (let i = 0; i < 8; i++) {
+          particles.push({
+            x: canvas.width * 0.42 - 45,
+            y: canvas.height * 0.56,
+            vx: -Math.random() * 5 - 2,
+            vy: (Math.random() - 0.5) * 3,
+            size: Math.random() * 8 + 4,
+            color: '#38bdf8',
+            life: 25
           });
         }
-        hero.tx = 165 + Math.random() * 150;
-      } else if (base.id === 'bolt') {
-        hazards.push({ kind: 'bolt', x: hero.x, timer: 42, user: u, pwr: pwr });
-        hero.tx = hero.x > 240 ? 175 : 305;
-      } else if (base.id === 'ice') {
-        hero.freeze = 95;
-        spawnExplosion(hero.x, hero.y, '#67e8f9', 26);
-        damageHero(pwr * 0.7, 'BEKU ES');
-      } else if (base.id === 'bomb') {
-        hero.bomb = { timer: 135, pwr: pwr, hp: 3, user: u };
-      } else if (base.id === 'hammer') {
-        hazards.push({ kind: 'hammer', side: Math.random() > 0.5 ? 1 : -1, ang: -1.5, y: hero.y, user: u, pwr: pwr, hit: false });
-      } else if (base.id === 'ufo') {
-        hazards.push({ kind: 'ufo', x: 240, y: 145, vx: 3.8, timer: 140, user: u, pwr: pwr });
-      } else if (base.id === 'meteor') {
-        lavaY = 175;
-        for (let i = 0; i < 5; i++) {
-          hazards.push({
-            kind: 'meteor',
-            sprite: customGiftImg || sprites.meteor,
-            avatar: avatarImg,
-            x: 145 + Math.random() * 190,
-            y: -55 - i * 85,
-            vx: (Math.random() - 0.5) * 3.5,
-            vy: 10.5,
-            r: 32,
-            rot: 0,
-            user: u,
-            pwr: pwr * 0.45
-          });
-        }
-      }
-    }
-
-    // Tombol Tes di Panel Bawah
-    const grid = document.getElementById('btnGrid');
-    function addGridBtn(label, spriteKey, bg, onClick, span4) {
-      const b = document.createElement('button');
-      b.className = 'btn';
-      b.style.background = bg;
-      if (span4) b.style.gridColumn = 'span 4';
-      const img = document.createElement('img');
-      img.src = SPRITE_URLS[spriteKey];
-      const sp = document.createElement('span');
-      sp.textContent = label;
-      b.appendChild(img);
-      b.appendChild(sp);
-      b.onclick = onClick;
-      grid.appendChild(b);
-    }
-
-    addGridBtn('NITRO', 'rocket', '#059669', () => triggerBoost('Penonton', 20));
-    const btnColors = { saw: '#b45309', donut: '#be185d', bolt: '#0369a1', ice: '#0e7490', bomb: '#b91c1c', hammer: '#7e22ce', ufo: '#4338ca' };
-    GIFT_CATALOG.slice(0, 7).forEach((g) => {
-      addGridBtn(g.gift.toUpperCase(), g.sprite, btnColors[g.id], () => triggerChallenge({ id: g.id, user: 'Tes_Live', giftName: g.gift, pwr: g.pwr }));
-    });
-    addGridBtn('TES GIFT SULTAN (METEOR + LAVA)', 'lion', 'linear-gradient(90deg,#dc2626,#d97706)', () => triggerChallenge({ id: 'meteor', user: 'Sultan_TikTok', giftName: 'Singa Sultan', pwr: 180 }), true);
-
-    const btnSim = document.getElementById('btnSim');
-    btnSim.onclick = () => {
-      simBotActive = !simBotActive;
-      btnSim.textContent = simBotActive ? 'BOT: AKTIF' : 'BOT: MATI';
-      btnSim.style.background = simBotActive ? '#dc2626' : '#334155';
-    };
-
-    const FAKE_NAMES = ['Sultan_Tasik', 'Raja_Sawer88', 'Naga_Hitam', 'Kaisar_Gift', 'Ratu_Mawar'];
-    setInterval(() => {
-      if (!simBotActive) return;
-      const u = FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
-      if (Math.random() < 0.35) triggerBoost(u, 20);
-      else {
-        const pick = GIFT_CATALOG[Math.floor(Math.random() * GIFT_CATALOG.length)];
-        triggerChallenge({ id: pick.id, user: u, giftName: pick.gift, pwr: pick.pwr });
-      }
-    }, 2500);
-
-    // Koneksi Real TikTok Live
-    let socket = null;
-    function connectToTikTok(username) {
-      const clean = (username || '').replace('@', '').trim();
-      if (!clean) {
-        alert('Ketik username TikTok kamu terlebih dahulu!');
         return;
       }
-      document.getElementById('tiktokUser').value = '@' + clean;
-      const stEl = document.getElementById('uiStatus');
-      stEl.textContent = 'MENGHUBUNGKAN KE @' + clean.toUpperCase() + '...';
-      stEl.style.color = '#fde047';
 
-      try {
-        const bridgeUrl = window.location.hostname.includes('github.io') ? 'http://localhost:3000' : window.location.origin;
-        if (socket) socket.disconnect();
-        socket = io(bridgeUrl, { reconnectionAttempts: 15 });
-        socket.emit('join-live', clean);
-
-        socket.on('status', (st) => {
-          stEl.textContent = st.text;
-          stEl.style.color = st.state === 'connected' ? '#34d399' : '#fde047';
-        });
-
-        socket.on('live-event', (ev) => {
-          if (ev.kind === 'boost' || ev.kind === 'chat') {
-            triggerBoost(ev.user, ev.power || 20, ev.avatar);
-          } else if (ev.kind === 'gift') {
-            triggerChallenge(ev);
-          }
-        });
-      } catch (e) {}
-    }
-
-    document.getElementById('btnConnect').onclick = () => connectToTikTok(document.getElementById('tiktokUser').value);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let uParam = urlParams.get('user');
-    if (!uParam || uParam.toLowerCase() === 'ptrgenz') uParam = 'ptrgenz';
-    connectToTikTok(uParam);
-    if (urlParams.get('user')) connectToTikTok(urlParams.get('user'));
-    if (urlParams.get('live') === '1') {
-      uiBottom.classList.add('hidden');
-      toggleBtn.style.display = 'none';
-    }
-
-    function drawHazardObject(h) {
-      ctx.save();
-      ctx.translate(h.x, h.y);
-      ctx.rotate(h.rot);
-
-      if (h.kind === 'saw') {
-        const teeth = 12;
-        ctx.fillStyle = '#cbd5e1';
-        ctx.beginPath();
-        for (let i = 0; i < teeth * 2; i++) {
-          const rad = i % 2 === 0 ? h.r + 6 : h.r - 2;
-          const ang = (i * Math.PI) / teeth;
-          const tx = Math.cos(ang) * rad, ty = Math.sin(ang) * rad;
-          if (i === 0) ctx.moveTo(tx, ty); else ctx.lineTo(tx, ty);
+      // Dorongan kecepatan langsung
+      if (dir === 'up') {
+        vel = Math.min(vel + Math.min(power * 0.04, 18), 22);
+        setSubtitle('@' + sender.toUpperCase() + ' KIRIM', (ev.label || 'TRUK KOPDES') + '!');
+        speakIndo(sender + ' membantu dorong mobil MBG dengan ' + (ev.label || 'Truk Kopdes'));
+      } else {
+        vel = Math.max(vel - Math.min(power * 0.055, 26), -24);
+        shakeTime = 28;
+        setSubtitle((ev.giftName || 'GIFT').toUpperCase() + ' DIDORONG', (ev.label || 'ANGKOT') + '!');
+        speakIndo('Awas! ' + sender + ' mengirim ' + (ev.label || 'serangan') + '!');
+        if (type === 'meteor' || power >= 450) {
+          triggerMeme('OH KOK MOBIL MBG GUE KENA ' + (ev.label || 'METEOR').toUpperCase() + '?!');
         }
+      }
+
+      activeUnits.push({
+        dir,
+        type,
+        sender,
+        label: ev.label || type.toUpperCase(),
+        count,
+        power,
+        timer: 190,
+        maxTimer: 190,
+        offset: dir === 'up' ? -150 : 210
+      });
+
+      renderComboBadges();
+    }
+
+    function renderComboBadges() {
+      const counts = {};
+      const icons = {
+        angkot: '??',
+        kaki: '??',
+        soundhoreg: '??',
+        kameha: '?',
+        ufo: '??',
+        meteor: '??',
+        kopdes: '??',
+        jet: '??'
+      };
+      activeUnits.forEach(u => {
+        counts[u.type] = (counts[u.type] || 0) + (u.count || 1);
+      });
+      comboStack.innerHTML = Object.keys(counts).map(k =>
+        '<div class="combo-badge">' + (icons[k] || '??') + ' x' + counts[k] + '</div>'
+      ).join('');
+    }
+
+    // Gambar Truk / Kendaraan / Efek di atas jalan
+    function drawVehicleBox(x, y, slope, w, h, bodyColor, cabinColor, titleText, subTitle, isFacingLeft) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(slope);
+      if (isFacingLeft) ctx.scale(-1, 1);
+
+      // Bayangan bawah
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath();
+      ctx.ellipse(0, 4, w * 0.48, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Box Kargo Belakang
+      ctx.fillStyle = bodyColor;
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(-w * 0.5, -h - 8, w * 0.68, h, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Kabin Depan
+      ctx.fillStyle = cabinColor;
+      ctx.beginPath();
+      ctx.roundRect(w * 0.16, -h * 0.78 - 8, w * 0.34, h * 0.78, [0, 8, 4, 0]);
+      ctx.fill();
+      ctx.stroke();
+
+      // Kaca Jendela
+      ctx.fillStyle = '#bae6fd';
+      ctx.fillRect(w * 0.24, -h * 0.7 - 6, w * 0.2, h * 0.34);
+
+      // Tulisan pada Box
+      if (!isFacingLeft) {
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 10px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(titleText, -w * 0.16, -h * 0.52 - 6);
+        ctx.fillStyle = '#15803d';
+        ctx.font = 'bold 8px sans-serif';
+        ctx.fillText(subTitle || '', -w * 0.16, -h * 0.26 - 6);
+      }
+
+      // Roda Depan & Belakang
+      [-w * 0.28, w * 0.3].forEach(wx => {
+        ctx.save();
+        ctx.translate(wx, -6);
+        ctx.rotate(wheelAngle);
+        ctx.fillStyle = '#111827';
+        ctx.beginPath();
+        ctx.arc(0, 0, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#9ca3af';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, 5, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(-8, 0); ctx.lineTo(8, 0);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      ctx.restore();
+    }
+
+    // Loop Render Utama 60 FPS
+    function updateAndDraw() {
+      const W = canvas.width;
+      const H = canvas.height;
+      const baseRoadY = H * 0.63;
+
+      // Fisika Kecepatan & Gravitasi Tanjakan
+      const worldX = dist * 9;
+      const slope = getRoadSlope(worldX);
+
+      if (autoGas) {
+        vel += (3.1 - vel) * 0.04 - Math.sin(slope) * 0.18;
+      } else {
+        vel *= 0.92;
+      }
+
+      // Efek dorongan dari unit aktif
+      activeUnits.forEach(u => {
+        u.timer--;
+        u.offset *= 0.88; // Merapat ke mobil MBG
+        if (u.dir === 'up') vel += 0.22;
+        else vel -= 0.32;
+      });
+
+      for (let i = activeUnits.length - 1; i >= 0; i--) {
+        if (activeUnits[i].timer <= 0) {
+          activeUnits.splice(i, 1);
+          renderComboBadges();
+        }
+      }
+
+      dist += vel * 0.16;
+      wheelAngle += vel * 0.08;
+
+      // Cek Menang (30.000 m) atau Gagal Jauh (-1.000 m)
+      if (dist >= GOAL_DIST) {
+        finishCount++;
+        valFinish.textContent = finishCount;
+        dist = 0;
+        vel = 3;
+        setSubtitle('SELAMAT! MOBIL MBG TIBA DI', 'SEKOLAH!');
+        speakIndo('Alhamdulillah, mobil makan bergizi gratis berhasil sampai di sekolah!');
+      } else if (dist <= -1000) {
+        deathCount++;
+        valDeath.textContent = deathCount;
+        dist = 0;
+        vel = 3;
+        triggerMeme('GAGAL NGANTERIN MBG! ULANG DARI POSKO!');
+        speakIndo('Yah gagal sampai sekolah, ulang lagi dari posko!');
+      }
+
+      // Update UI Top Progress Bar & Speedometer
+      const pct = Math.max(0, Math.min((dist / GOAL_DIST) * 100, 100));
+      progFill.style.width = pct + '%';
+      progTruck.style.left = pct + '%';
+      progText.textContent = Math.round(dist).toLocaleString('id-ID') + ' m / 30.000 m';
+      gaugeSpeed.textContent = Math.round(Math.abs(vel) * 14);
+
+      ctx.save();
+      if (shakeTime > 0) {
+        shakeTime--;
+        ctx.translate((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
+      }
+
+      // 1. LANGIT CERAH & AWAN PEGUNUNGAN INDONESIA
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, baseRoadY);
+      skyGrad.addColorStop(0, '#3b82f6');
+      skyGrad.addColorStop(0.55, '#93c5fd');
+      skyGrad.addColorStop(1, '#e0f2fe');
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, W, H);
+
+      // 2. GUNUNG BIRU DI KEJAUHAN (Parallax Lambat)
+      const mtnOffset = -((worldX * 0.06) % (W * 1.2));
+      for (let m = -1; m <= 2; m++) {
+        const mx = mtnOffset + m * (W * 0.85);
+        ctx.fillStyle = '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(mx, baseRoadY);
+        ctx.lineTo(mx + W * 0.42, baseRoadY - 260);
+        ctx.lineTo(mx + W * 0.88, baseRoadY);
         ctx.closePath();
         ctx.fill();
 
-        const g = ctx.createRadialGradient(0, 0, 3, 0, 0, h.r);
-        g.addColorStop(0, '#f59e0b');
-        g.addColorStop(1, '#78350f');
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(0, 0, h.r - 3, 0, Math.PI * 2); ctx.fill();
-      } else if (h.kind === 'donut') {
-        ctx.fillStyle = '#ec4899';
-        ctx.beginPath(); ctx.arc(0, 0, h.r, 0, Math.PI * 2); ctx.fill();
-        ctx.lineWidth = 3; ctx.strokeStyle = '#fde047'; ctx.stroke();
-      } else if (h.kind === 'meteor') {
-        const mg = ctx.createRadialGradient(-4, -4, 3, 0, 0, h.r + 4);
-        mg.addColorStop(0, '#fde047');
-        mg.addColorStop(0.5, '#ea580c');
-        mg.addColorStop(1, '#7f1d1d');
-        ctx.fillStyle = mg;
-        ctx.beginPath(); ctx.arc(0, 0, h.r, 0, Math.PI * 2); ctx.fill();
-      }
-
-      if (h.sprite && h.sprite.complete && h.sprite.naturalWidth > 0) {
-        ctx.drawImage(h.sprite, -15, -15, 30, 30);
-      }
-      ctx.restore();
-
-      // Label Pengirim Elegan
-      ctx.save();
-      const tagW = Math.max(76, h.user.length * 6.2 + 22);
-      ctx.fillStyle = 'rgba(9, 14, 28, 0.88)';
-      ctx.strokeStyle = 'rgba(250, 204, 21, 0.7)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(h.x - tagW / 2, h.y - h.r - 22, tagW, 17, 8);
-      ctx.fill();
-      ctx.stroke();
-
-      if (h.avatar && h.avatar.complete && h.avatar.naturalWidth > 0) {
-        ctx.drawImage(h.avatar, h.x - tagW / 2 + 2, h.y - h.r - 20.5, 14, 14);
-      }
-      ctx.fillStyle = '#fde047';
-      ctx.font = 'bold 9.5px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('@' + h.user, h.x + (h.avatar ? 5 : 0), h.y - h.r - 10);
-      ctx.restore();
-    }
-
-    function drawClimberHero(x, y) {
-      ctx.save();
-      ctx.translate(x, y);
-
-      // Tali Baja Pengaman Tengah
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.45)';
-      ctx.lineWidth = 2;
-      ctx.setLineDash([5, 4]);
-      ctx.beginPath(); ctx.moveTo(0, -26); ctx.lineTo(0, -220); ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Api Jetpack Halus
-      if (hero.jetpack > 0) {
-        hero.jetpack--;
-        const flameH = 48 + Math.random() * 26;
-        const fg = ctx.createLinearGradient(0, 16, 0, 16 + flameH);
-        fg.addColorStop(0, '#ffffff');
-        fg.addColorStop(0.35, '#38bdf8');
-        fg.addColorStop(1, 'rgba(37, 99, 235, 0)');
-        ctx.fillStyle = fg;
+        // Bukit Hijau & Sawah Terasering
+        ctx.fillStyle = '#15803d';
         ctx.beginPath();
-        ctx.moveTo(-14, 16); ctx.lineTo(-4, 16); ctx.lineTo(-9, 16 + flameH);
-        ctx.moveTo(4, 16);   ctx.lineTo(14, 16); ctx.lineTo(9, 16 + flameH);
+        ctx.moveTo(mx - 80, baseRoadY);
+        ctx.quadraticCurveTo(mx + W * 0.35, baseRoadY - 120, mx + W * 0.75, baseRoadY);
         ctx.fill();
       }
 
-      // Perisai Energy Tipis & Elegan
-      if (shield > 0) {
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.65)';
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(0, -2, 40, 0, Math.PI * 2); ctx.stroke();
-      }
+      // 3. POHON PINUS, SAWAH, SAUNG KAYU, & POSKO SPPG (Parallax Menengah)
+      const treeSpacing = 180;
+      const firstTreeIdx = Math.floor((worldX - W) / treeSpacing);
+      const lastTreeIdx = Math.ceil((worldX + W) / treeSpacing);
+      const mbgScreenX = W * 0.44;
 
-      // Thruster Punggung
-      ctx.fillStyle = '#334155';
-      ctx.beginPath();
-      ctx.roundRect(-17, -9, 7, 22, 3);
-      ctx.roundRect(10, -9, 7, 22, 3);
-      ctx.fill();
+      for (let idx = firstTreeIdx; idx <= lastTreeIdx; idx++) {
+        const objWorldX = idx * treeSpacing;
+        const screenX = mbgScreenX + (objWorldX - worldX);
+        const groundY = getRoadY(objWorldX, baseRoadY);
 
-      // Syal / Jubah Merah Dinamis
-      const wave = Math.sin(hero.phase * 2) * 8;
-      ctx.fillStyle = '#e11d48';
-      ctx.beginPath();
-      ctx.moveTo(-12, -10);
-      ctx.lineTo(12, -10);
-      ctx.lineTo(20 + wave, 25);
-      ctx.lineTo(-16 + wave * 0.4, 24);
-      ctx.closePath();
-      ctx.fill();
+        // Posko Dapur MBG di titik 0m
+        if (idx === 0) {
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(screenX - 110, groundY - 95, 170, 90);
+          ctx.fillStyle = '#1d4ed8';
+          ctx.fillRect(screenX - 118, groundY - 118, 186, 26);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 9px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText('SATUAN PELAYANAN PEMENUHAN GIZI', screenX - 25, groundY - 102);
+          continue;
+        }
 
-      // Anggota Tubuh Memanjat
-      const sw = Math.sin(hero.phase) * 14;
-      ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 6.5;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(-8, 12);  ctx.lineTo(-15, 32 + sw * 0.6);
-      ctx.moveTo(8, 12);   ctx.lineTo(15, 32 - sw * 0.6);
-      ctx.moveTo(-12, -6); ctx.lineTo(-24, -24 + sw);
-      ctx.moveTo(12, -6);  ctx.lineTo(24, -24 - sw);
-      ctx.stroke();
+        // Pohon Pinus / Cemara Tinggi
+        ctx.fillStyle = '#5c4033';
+        ctx.fillRect(screenX - 6, groundY - 120, 12, 120);
+        ctx.fillStyle = '#166534';
+        for (let layer = 0; layer < 3; layer++) {
+          ctx.beginPath();
+          ctx.arc(screenX, groundY - 115 - layer * 28, 38 - layer * 6, 0, Math.PI * 2);
+          ctx.fill();
+        }
 
-      // Body Suit Modern
-      ctx.fillStyle = hero.hurt > 0 ? '#ef4444' : '#0f172a';
-      ctx.beginPath(); ctx.roundRect(-13, -12, 26, 26, 6); ctx.fill();
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.8; ctx.stroke();
-
-      // Core Reactor
-      ctx.fillStyle = '#22d3ee';
-      ctx.beginPath(); ctx.arc(0, 1, 4, 0, Math.PI * 2); ctx.fill();
-
-      // Helm
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath(); ctx.arc(0, -24, 15, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2; ctx.stroke();
-
-      // Visor Neon
-      ctx.fillStyle = hero.jetpack > 0 ? '#fde047' : '#38bdf8';
-      ctx.beginPath(); ctx.roundRect(-10, -27, 20, 6, 3); ctx.fill();
-
-      if (hero.freeze > 0) {
-        ctx.fillStyle = 'rgba(103, 232, 249, 0.48)';
-        ctx.strokeStyle = '#a5f3fc';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.roundRect(-28, -44, 56, 84, 8); ctx.fill(); ctx.stroke();
-      }
-
-      if (hero.bomb) {
-        ctx.fillStyle = '#090d16';
-        ctx.beginPath(); ctx.arc(0, 3, 13, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2; ctx.stroke();
-        ctx.fillStyle = '#ef4444';
-        ctx.font = '900 11px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(Math.ceil(hero.bomb.timer / 35), 0, 7);
-      }
-
-      ctx.restore();
-    }
-
-    function loop() {
-      frame++;
-      if (hero.freeze > 0) {
-        hero.freeze--;
-        targetAlt = Math.max(0, targetAlt - 0.2);
-      } else {
-        targetAlt += hero.jetpack > 0 ? 0.92 : 0.22;
-        hero.phase += hero.jetpack > 0 ? 0.38 : 0.16;
-      }
-      if (hero.hurt > 0) hero.hurt--;
-
-      if (hero.bomb) {
-        hero.bomb.timer--;
-        if (hero.bomb.timer <= 0) {
-          spawnExplosion(hero.x, hero.y, '#ef4444', 40);
-          damageHero(hero.bomb.pwr, 'BOM MELEDAK');
-          hero.bomb = null;
+        // Saung Kayu / Pondok Desa setiap kelipatan 3
+        if (Math.abs(idx) % 3 === 1) {
+          const sx = screenX + 65;
+          const sy = getRoadY(objWorldX + 65, baseRoadY);
+          ctx.fillStyle = '#92400e';
+          ctx.fillRect(sx - 35, sy - 58, 70, 52);
+          ctx.fillStyle = '#78350f';
+          ctx.beginPath();
+          ctx.moveTo(sx - 46, sy - 56);
+          ctx.lineTo(sx, sy - 86);
+          ctx.lineTo(sx + 46, sy - 56);
+          ctx.closePath();
+          ctx.fill();
         }
       }
 
-      if (targetAlt >= 1000) {
-        wins++; targetAlt = 35; alt = 35;
-        showToast('PUNCAK 1000M DITAKLUKKAN!', 'Total Kemenangan: ' + wins + 'x', SPRITE_URLS.crown);
-        spawnExplosion(240, 320, '#fde047', 55);
-        speakId('Selamat! Puncak seribu meter berhasil ditaklukkan!');
-      }
-
-      alt += (targetAlt - alt) * 0.1;
-      hero.x += (hero.tx - hero.x) * 0.09;
-      if (lavaY > 54) lavaY -= 0.4;
-
-      if (frame % 3 === 0) updateHud();
-
-      ctx.save();
-      if (shake > 0) {
-        ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
-        shake *= 0.88;
-      }
-
-      // 1. Background Langit Malam & Aurora Elegan
-      const sky = ctx.createLinearGradient(0, 0, 0, 900);
-      sky.addColorStop(0, '#020617');
-      sky.addColorStop(0.45, '#090d1e');
-      sky.addColorStop(1, '#1e1b4b');
-      ctx.fillStyle = sky;
-      ctx.fillRect(0, 0, 480, 900);
-
-      // Cahaya Aurora Halus
-      const aur = ctx.createRadialGradient(240, 180, 20, 240, 180, 260);
-      aur.addColorStop(0, 'rgba(56, 189, 248, 0.12)');
-      aur.addColorStop(0.5, 'rgba(168, 85, 247, 0.06)');
-      aur.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = aur;
-      ctx.fillRect(0, 0, 480, 500);
-
-      // Bintang Berkelip
-      stars.forEach((s) => {
-        ctx.fillStyle = 'rgba(255,255,255,' + s.a + ')';
-        ctx.fillRect(s.x, (s.y + alt * 2) % 900, s.s, s.s);
-      });
-
-      // 2. Koridor Tebing Tengah (x: 115 s/d 365) agar Sisi Kiri & Kanan Lega untuk UI
-      ctx.fillStyle = '#040711';
-      ctx.fillRect(0, 0, 115, 900);
-      ctx.fillRect(365, 0, 115, 900);
-
-      const cliffGrad = ctx.createLinearGradient(115, 0, 365, 0);
-      cliffGrad.addColorStop(0, '#0f172a');
-      cliffGrad.addColorStop(0.18, '#1e293b');
-      cliffGrad.addColorStop(0.5, '#263349');
-      cliffGrad.addColorStop(0.82, '#1e293b');
-      cliffGrad.addColorStop(1, '#0f172a');
-      ctx.fillStyle = cliffGrad;
-      ctx.fillRect(115, 0, 250, 900);
-
-      // Garis Tepi Tebing Neon Tipis
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
-      ctx.lineWidth = 1.5;
+      // 4. TANAH TEBING, SUNGAI & JALAN RAYA ASPAL BERGELOMBANG
       ctx.beginPath();
-      ctx.moveTo(115, 0); ctx.lineTo(115, 900);
-      ctx.moveTo(365, 0); ctx.lineTo(365, 900);
+      ctx.moveTo(0, H);
+      for (let sx = 0; sx <= W; sx += 12) {
+        const wx = worldX + (sx - mbgScreenX);
+        ctx.lineTo(sx, getRoadY(wx, baseRoadY));
+      }
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      const soilGrad = ctx.createLinearGradient(0, baseRoadY, 0, H);
+      soilGrad.addColorStop(0, '#15803d');
+      soilGrad.addColorStop(0.12, '#166534');
+      soilGrad.addColorStop(0.22, '#78350f');
+      soilGrad.addColorStop(1, '#451a03');
+      ctx.fillStyle = soilGrad;
+      ctx.fill();
+
+      // Permukaan Aspal
+      ctx.beginPath();
+      for (let sx = 0; sx <= W; sx += 10) {
+        const wx = worldX + (sx - mbgScreenX);
+        const ry = getRoadY(wx, baseRoadY);
+        if (sx === 0) ctx.moveTo(sx, ry);
+        else ctx.lineTo(sx, ry);
+      }
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 18;
       ctx.stroke();
 
-      // Garis Penanda Meter di Dinding Tebing
-      const scrollY = (alt * 15) % 900;
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
-      ctx.lineWidth = 1;
-      for (let y = -90; y < 900; y += 90) {
-        const my = (y + scrollY) % 900;
-        ctx.beginPath(); ctx.moveTo(125, my); ctx.lineTo(355, my); ctx.stroke();
-      }
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 2;
+      ctx.stroke();
 
-      // Pijakan Batu Tebing
-      rockHolds.forEach((r) => {
-        const ry = (r.y + scrollY) % 900;
-        ctx.fillStyle = '#090d16';
-        ctx.beginPath(); ctx.roundRect(r.x, ry + 3, r.w, r.h, 5); ctx.fill();
-        ctx.fillStyle = '#334155';
-        ctx.beginPath(); ctx.roundRect(r.x, ry, r.w, r.h, 5); ctx.fill();
-        ctx.fillStyle = '#64748b';
-        ctx.fillRect(r.x + 4, ry + 1.5, r.w - 8, 3);
+      // 5. GAMBAR MOBIL UTAMA: MOBIL MBG (MAKAN BERGIZI GRATIS)
+      const mbgY = getRoadY(worldX, baseRoadY);
+      drawVehicleBox(mbgScreenX, mbgY, slope, 96, 48, '#ffffff', '#f1f5f9', 'MBG GRATIS', 'DAPUR SPPG', false);
 
-        if (r.crystal) {
+      // 6. GAMBAR UNIT GIFT PENGGANGGU (MUNDUR) & PEMBANTU (MAJU)
+      activeUnits.forEach(u => {
+        const unitScreenX = mbgScreenX + (u.dir === 'up' ? -98 + u.offset : 98 + u.offset);
+        const unitWorldX = worldX + (unitScreenX - mbgScreenX);
+        const unitY = getRoadY(unitWorldX, baseRoadY);
+        const unitSlope = getRoadSlope(unitWorldX);
+
+        // Nama Pengirim di atas unit
+        ctx.save();
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#fde047';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 4;
+        ctx.fillText('@' + u.sender + ' (' + u.label + ')', unitScreenX, unitY - 82);
+        ctx.restore();
+
+        if (u.type === 'angkot') {
+          drawVehicleBox(unitScreenX, unitY, unitSlope, 78, 40, '#0284c7', '#38bdf8', 'ANGKOT', '', true);
+        } else if (u.type === 'soundhoreg') {
+          drawVehicleBox(unitScreenX, unitY, unitSlope, 108, 54, '#1e1b4b', '#facc15', 'SOUND HOREG', 'BASS BOOST', true);
+          // Gelombang speaker warna-warni
+          ctx.strokeStyle = (u.timer % 6 < 3) ? '#ec4899' : '#22d3ee';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(unitScreenX - 35, unitY - 35, 25 + (u.timer % 15), 0, Math.PI * 2);
+          ctx.stroke();
+        } else if (u.type === 'kopdes' || u.type === 'jet') {
+          drawVehicleBox(unitScreenX, unitY, unitSlope, 105, 50, '#ffffff', '#ef4444', 'TRUK KOPDES', 'BANTU MBG', false);
+        } else if (u.type === 'ufo') {
+          // UFO Terbang menyedot dari atas mobil MBG
+          const ufoX = mbgScreenX + 20;
+          const ufoY = mbgY - 135;
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
+          ctx.beginPath();
+          ctx.moveTo(ufoX - 25, ufoY + 10);
+          ctx.lineTo(mbgScreenX - 55, mbgY);
+          ctx.lineTo(mbgScreenX + 55, mbgY);
+          ctx.lineTo(ufoX + 25, ufoY + 10);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.fillStyle = '#64748b';
+          ctx.beginPath();
+          ctx.ellipse(ufoX, ufoY, 58, 18, 0, 0, Math.PI * 2);
+          ctx.fill();
           ctx.fillStyle = '#38bdf8';
           ctx.beginPath();
-          ctx.moveTo(r.x + 12, ry);
-          ctx.lineTo(r.x + 18, ry - 12);
-          ctx.lineTo(r.x + 24, ry);
+          ctx.arc(ufoX, ufoY - 8, 26, Math.PI, 0);
+          ctx.fill();
+        } else if (u.type === 'kameha' || u.type === 'kaki') {
+          // Laser Kamehameha / Hantaman dari atas
+          ctx.strokeStyle = '#60a5fa';
+          ctx.lineWidth = 28;
+          ctx.beginPath();
+          ctx.moveTo(mbgScreenX - 140, mbgY - 170);
+          ctx.lineTo(mbgScreenX + 10, mbgY - 20);
+          ctx.stroke();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 12;
+          ctx.stroke();
+        } else if (u.type === 'meteor') {
+          // Bola Meteor Api Raksasa menggelinding (Persis Video 2!)
+          const metX = mbgScreenX + 78;
+          const metY = mbgY - 46;
+          const grad = ctx.createRadialGradient(metX, metY, 10, metX, metY, 64);
+          grad.addColorStop(0, '#fef08a');
+          grad.addColorStop(0.45, '#f97316');
+          grad.addColorStop(0.8, '#dc2626');
+          grad.addColorStop(1, 'rgba(220,38,38,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(metX, metY, 64, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#451a03';
+          ctx.beginPath();
+          ctx.arc(metX, metY, 38, 0, Math.PI * 2);
           ctx.fill();
         }
       });
 
-      // Bar Progres Vertikal Ramping di Tepi Kanan Tebing (x: 373)
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
-      ctx.beginPath(); ctx.roundRect(373, 240, 8, 420, 4); ctx.fill();
-      const fillH = Math.min(420, (alt / 1000) * 420);
-      const barGrad = ctx.createLinearGradient(0, 660, 0, 240);
-      barGrad.addColorStop(0, '#0284c7');
-      barGrad.addColorStop(1, '#38bdf8');
-      ctx.fillStyle = barGrad;
-      ctx.beginPath(); ctx.roundRect(373, 660 - fillH, 8, fillH, 4); ctx.fill();
-      if (sprites.crown.complete) ctx.drawImage(sprites.crown, 369, 220, 16, 16);
-
-      // Partikel Bara Api Halus Naik dari Lava
-      ctx.fillStyle = 'rgba(251, 146, 60, 0.55)';
-      embers.forEach((e) => {
-        e.y -= e.vy;
-        if (e.y < 100) e.y = 880;
-        ctx.beginPath(); ctx.arc(e.x, e.y, e.r, 0, Math.PI * 2); ctx.fill();
-      });
-
-      // 3. Karakter Pemanjat
-      drawClimberHero(hero.x, hero.y);
-
-      // 4. Rintangan Gift
-      for (let i = hazards.length - 1; i >= 0; i--) {
-        const h = hazards[i];
-        if (h.kind === 'saw' || h.kind === 'donut' || h.kind === 'meteor') {
-          h.x += h.vx; h.y += h.vy; h.rot += 0.2;
-          if (h.x < 140 || h.x > 340) h.vx *= -1;
-          if (h.kind === 'meteor' && frame % 2 === 0) {
-            particles.push({ x: h.x, y: h.y - 12, vx: (Math.random() - 0.5) * 2, vy: -2.5, r: 5, color: '#f97316', life: 0.65 });
-          }
-          drawHazardObject(h);
-
-          if (Math.hypot(h.x - hero.x, h.y - hero.y) < h.r + 22) {
-            spawnExplosion(h.x, h.y, '#ef4444', 24);
-            damageHero(h.pwr, h.kind.toUpperCase());
-            hazards.splice(i, 1);
-            continue;
-          }
-          if (h.y > 940) hazards.splice(i, 1);
-        } else if (h.kind === 'ufo') {
-          h.timer--; h.x += h.vx;
-          if (h.x < 155 || h.x > 325) h.vx *= -1;
-          ctx.fillStyle = '#7c3aed';
-          ctx.beginPath(); ctx.ellipse(h.x, h.y, 44, 15, 0, 0, Math.PI * 2); ctx.fill();
-          ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.5; ctx.stroke();
-          ctx.fillStyle = '#38bdf8';
-          ctx.beginPath(); ctx.arc(h.x, h.y - 8, 20, Math.PI, 0); ctx.fill();
-          if (h.timer % 34 < 15) {
-            ctx.fillStyle = 'rgba(239, 68, 68, 0.65)';
-            ctx.fillRect(h.x - 14, h.y + 14, 28, 720);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(h.x - 4, h.y + 14, 8, 720);
-            if (Math.abs(hero.x - h.x) < 30) damageHero(h.pwr * 0.18, 'LASER UFO');
-          }
-          if (h.timer <= 0) hazards.splice(i, 1);
-        } else if (h.kind === 'bolt') {
-          h.timer--;
-          if (h.timer > 12) {
-            ctx.strokeStyle = 'rgba(239, 68, 68, 0.8)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([6, 5]);
-            ctx.beginPath(); ctx.moveTo(h.x, 0); ctx.lineTo(h.x, 900); ctx.stroke();
-            ctx.setLineDash([]);
-          } else {
-            ctx.strokeStyle = '#fde047';
-            ctx.lineWidth = 8;
-            ctx.beginPath(); ctx.moveTo(h.x, 0); ctx.lineTo(h.x - 18, 310); ctx.lineTo(h.x + 18, 530); ctx.lineTo(h.x, 900); ctx.stroke();
-            if (h.timer === 10 && Math.abs(hero.x - h.x) < 42) damageHero(h.pwr, 'PETIR');
-          }
-          if (h.timer <= 0) hazards.splice(i, 1);
-        } else if (h.kind === 'hammer') {
-          h.ang += 0.14;
-          const px = h.side === 1 ? 115 : 365;
-          const hx = px + Math.cos(h.ang) * 145 * h.side, hy = h.y + Math.sin(h.ang) * 145;
-          ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 8;
-          ctx.beginPath(); ctx.moveTo(px, h.y); ctx.lineTo(hx, hy); ctx.stroke();
-          ctx.fillStyle = '#7e22ce';
-          ctx.beginPath(); ctx.arc(hx, hy, 30, 0, Math.PI * 2); ctx.fill();
-          if (sprites.hammer.complete) ctx.drawImage(sprites.hammer, hx - 16, hy - 16, 32, 32);
-          if (!h.hit && Math.hypot(hx - hero.x, hy - hero.y) < 48) {
-            h.hit = true;
-            damageHero(h.pwr, 'PALU THOR');
-          }
-          if (h.ang > 1.6) hazards.splice(i, 1);
-        }
-      }
-
-      // 5. Partikel & Popup Teks
+      // 7. PARTIKEL ASAP & PERCIKAN
       for (let i = particles.length - 1; i >= 0; i--) {
-        const p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.04;
-        if (p.life <= 0) { particles.splice(i, 1); continue; }
-        ctx.globalAlpha = p.life; ctx.fillStyle = p.color;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-
-      for (let i = popups.length - 1; i >= 0; i--) {
-        const f = popups[i]; f.y -= 1.6; f.life -= 0.025;
-        if (f.life <= 0) { popups.splice(i, 1); continue; }
-        ctx.globalAlpha = f.life; ctx.fillStyle = f.color;
-        ctx.font = '800 13px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(f.txt, f.x, f.y);
-      }
-      ctx.globalAlpha = 1;
-
-      // 6. Lava Membara di Dasar Koridor Tebing
-      const lavaGrad = ctx.createLinearGradient(0, 900 - lavaY, 0, 900);
-      lavaGrad.addColorStop(0, '#fde047');
-      lavaGrad.addColorStop(0.3, '#ea580c');
-      lavaGrad.addColorStop(1, '#991b1b');
-      ctx.fillStyle = lavaGrad;
-      ctx.fillRect(115, 900 - lavaY, 250, lavaY);
-
-      if (flash > 0) {
-        ctx.fillStyle = 'rgba(239, 68, 68, ' + flash + ')';
-        ctx.fillRect(0, 0, 480, 900);
-        flash *= 0.85;
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * (p.life / 25), 0, Math.PI * 2);
+        ctx.fill();
+        if (p.life <= 0) particles.splice(i, 1);
       }
 
       ctx.restore();
-      requestAnimationFrame(loop);
+      requestAnimationFrame(updateAndDraw);
     }
-    loop();
-  })();
-  </script>
 
+    requestAnimationFrame(updateAndDraw);
 
-
-
-
-<!-- ID_TTS_PATCH_START -->
-<style>
-  /* BACKGROUND CYBER NEON WIDESCREEN */
-  body {
-    background: radial-gradient(circle at 50% 20%, #131c38 0%, #070b16 55%, #03050a 100%) !important;
-    overflow: hidden !important;
-  }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
-    background-size: 42px 42px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* PERCANTIK CANVAS & KARTU BAWAAN GAME */
-  canvas {
-    border-left: 2px solid rgba(0, 229, 255, 0.45) !important;
-    border-right: 2px solid rgba(0, 229, 255, 0.45) !important;
-    box-shadow: 0 0 50px rgba(0, 229, 255, 0.22), 0 0 90px rgba(168, 85, 247, 0.15) !important;
-  }
-
-  /* SIDEBAR KIRI & KANAN UNTUK LAYAR LEBAR */
-  .pro-side-panel {
-    position: fixed;
-    top: 18px;
-    width: 280px;
-    z-index: 9990;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    color: #fff;
-    pointer-events: none;
-  }
-  #pro-left-panel { left: 18px; }
-  #pro-right-panel { right: 18px; }
-
-  @media (max-width: 1050px) {
-    #pro-left-panel, #pro-right-panel { display: none !important; }
-  }
-
-  .pro-card {
-    background: linear-gradient(145deg, rgba(16, 24, 48, 0.88), rgba(9, 13, 26, 0.92));
-    border: 1px solid rgba(0, 229, 255, 0.35);
-    border-radius: 16px;
-    padding: 12px 14px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-  }
-  .pro-card.purple { border-color: rgba(192, 132, 252, 0.4); }
-  .pro-card.gold { border-color: rgba(250, 204, 21, 0.45); }
-
-  .pro-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.9px;
-    text-transform: uppercase;
-    color: #38bdf8;
-    margin-bottom: 8px;
-  }
-  .pro-live-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(239, 68, 68, 0.2);
-    border: 1px solid #ef4444;
-    color: #fca5a5;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-size: 10px;
-    font-weight: 800;
-  }
-  .pro-dot {
-    width: 7px;
-    height: 7px;
-    background: #ef4444;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #ef4444;
-    animation: proPulse 1.2s infinite;
-  }
-  @keyframes proPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.35); opacity: 0.5; }
-  }
-
-  .pro-streamer-name {
-    font-size: 18px;
-    font-weight: 900;
-    background: linear-gradient(90deg, #fff, #38bdf8, #c084fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin-bottom: 4px;
-  }
-  .pro-sub { font-size: 11px; color: #94a3b8; line-height: 1.4; }
-
-  /* LIVE FEED AKTIVITAS */
-  #pro-feed-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    max-height: 230px;
-    overflow: hidden;
-  }
-  .pro-feed-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.05);
-    border-left: 3px solid #38bdf8;
-    border-radius: 8px;
-    padding: 6px 8px;
-    font-size: 11px;
-    animation: slideInFeed 0.25s ease-out;
-  }
-  .pro-feed-item.gift { border-left-color: #facc15; background: rgba(250, 204, 21, 0.1); }
-  .pro-feed-item.req { border-left-color: #1db954; background: rgba(29, 185, 84, 0.12); }
-  @keyframes slideInFeed {
-    from { opacity: 0; transform: translateX(-12px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
-
-  /* GRID ARSENAL GIFT KANAN */
-  .pro-gift-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 7px;
-  }
-  .pro-gift-box {
-    background: rgba(15, 23, 42, 0.85);
-    border: 1px solid rgba(148, 163, 184, 0.22);
-    border-radius: 10px;
-    padding: 7px 8px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-  }
-  .pro-gift-icon { font-size: 18px; }
-  .pro-gift-meta { flex: 1; overflow: hidden; }
-  .pro-gift-name { font-size: 11px; font-weight: 700; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pro-gift-dmg { font-size: 10px; font-weight: 800; color: #f87171; }
-  .pro-gift-box.boost .pro-gift-dmg { color: #4ade80; }
-
-  /* BANNER NOTIFIKASI GIFT DI TENGAH ATAS */
-  #pro-toast {
-    position: fixed;
-    top: 16px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-80px);
-    z-index: 99999;
-    background: linear-gradient(90deg, #ec4899, #8b5cf6, #06b6d4);
-    color: #fff;
-    padding: 8px 20px;
-    border-radius: 99px;
-    font-family: 'Segoe UI', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.55);
-    transition: transform 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-    pointer-events: none;
-    white-space: nowrap;
-  }
-  #pro-toast.show { transform: translateX(-50%) translateY(0); }
-
-  /* SPOTIFY PRO WIDGET (FULL DURATION + PROGRESS BAR) */
-  #sp-player {
-    position: fixed !important;
-    bottom: 16px !important;
-    left: 18px !important;
-    z-index: 2147483647 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 7px !important;
-    background: linear-gradient(160deg, rgba(18, 18, 18, 0.96), rgba(10, 14, 20, 0.98)) !important;
-    border: 2px solid #1db954 !important;
-    border-radius: 16px !important;
-    padding: 10px 13px !important;
-    color: #fff !important;
-    font-family: 'Segoe UI', Arial, sans-serif !important;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 20px rgba(29, 185, 84, 0.25) !important;
-    width: 305px !important;
-  }
-  .sp-top { display: flex; align-items: center; gap: 10px; }
-  #sp-disc-wrap {
-    position: relative;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    overflow: hidden;
-    flex-shrink: 0;
-    border: 2px solid #1db954;
-    background: radial-gradient(circle, #1db954 20%, #111 25%, #222 65%, #1db954 100%);
-    box-shadow: 0 0 12px rgba(29, 185, 84, 0.4);
-  }
-  #yt-bgm-frame {
-    width: 48px !important;
-    height: 48px !important;
-    border: none !important;
-    pointer-events: none !important;
-    transform: scale(1.35);
-  }
-  .sp-info { flex: 1; overflow: hidden; }
-  .sp-badge-row { display: flex; align-items: center; justify-content: space-between; }
-  #sp-badge { font-size: 9.5px; color: #1db954; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; }
-  #sp-time { font-size: 10px; color: #9ca3af; font-weight: 700; font-variant-numeric: tabular-nums; }
-  #sp-title { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; margin-top: 1px; }
-  #sp-artist { font-size: 11px; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-  /* PROGRESS BAR DURASI LAGU */
-  .sp-progress-bg {
-    width: 100%;
-    height: 5px;
-    background: #2a2a2a;
-    border-radius: 99px;
-    overflow: hidden;
-  }
-  #sp-progress-fill {
-    width: 0%;
-    height: 100%;
-    background: linear-gradient(90deg, #1db954, #4ade80);
-    border-radius: 99px;
-    transition: width 0.4s linear;
-  }
-
-  .sp-controls { display: flex; align-items: center; gap: 4px; }
-  .sp-btn {
-    background: #262626;
-    border: 1px solid #3f3f46;
-    color: #fff;
-    width: 27px;
-    height: 27px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .sp-btn.main { background: #1db954; color: #000; border: none; font-weight: bold; width: 31px; height: 31px; }
-  .sp-btn.active-loop { border-color: #1db954; color: #1db954; }
-  .sp-search-row { display: flex; gap: 5px; align-items: center; }
-  #sp-search-input {
-    flex: 1;
-    background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 11px;
-    padding: 5px 8px;
-    outline: none;
-  }
-  #sp-search-input:focus { border-color: #1db954; }
-  #sp-search-btn {
-    background: #1db954;
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 5px 9px;
-    cursor: pointer;
-  }
-  #sp-vol { width: 50px; accent-color: #1db954; cursor: pointer; }
-</style>
-
-<!-- NOTIFIKASI TOAST TENGAH -->
-<div id="pro-toast">?? Selamat Datang di Arena Live @ptrgenz!</div>
-
-<!-- PANEL KIRI: INFO STREAM & LIVE FEED INTERAKSI -->
-<div id="pro-left-panel" class="pro-side-panel">
-  <div class="pro-card">
-    <div class="pro-header">
-      <span>ARENA PANJAT TEBING</span>
-      <span class="pro-live-pill"><span class="pro-dot"></span> LIVE</span>
-    </div>
-    <div class="pro-streamer-name">@ptrgenz</div>
-    <div class="pro-sub">Tap-tap layar & komen untuk bantu naik! Kirim Gift untuk menjatuhkan pendaki!</div>
-  </div>
-
-  <div class="pro-card purple">
-    <div class="pro-header" style="color:#c084fc;">
-      <span>? AKTIVITAS PENONTON LIVE</span>
-      <span id="pro-event-count">AKTIF</span>
-    </div>
-    <div id="pro-feed-list">
-      <div class="pro-feed-item">?? Menunggu komentar & gift penonton...</div>
-      <div class="pro-feed-item req">?? Ketik <b>req judul lagu</b> di chat untuk request musik!</div>
-    </div>
-  </div>
-</div>
-
-<!-- PANEL KANAN: PANDUAN SERANGAN GIFT & REQUEST MUSIK -->
-<div id="pro-right-panel" class="pro-side-panel">
-  <div class="pro-card gold">
-    <div class="pro-header" style="color:#facc15;">
-      <span>?? DAFTAR EFEK GIFT LIVE</span>
-      <span>AUTO TRIGGER</span>
-    </div>
-    <div class="pro-gift-grid">
-      <div class="pro-gift-box boost">
-        <div class="pro-gift-icon">??</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Tap / Komen</div><div class="pro-gift-dmg">+20m Boost</div></div>
-      </div>
-      <div class="pro-gift-box">
-        <div class="pro-gift-icon">??</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Mawar (1c)</div><div class="pro-gift-dmg">-45m Gergaji</div></div>
-      </div>
-      <div class="pro-gift-box">
-        <div class="pro-gift-icon">??</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Es Krim (2c)</div><div class="pro-gift-dmg">-50m Beku</div></div>
-      </div>
-      <div class="pro-gift-box">
-        <div class="pro-gift-icon">?</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Jari Hati (5c)</div><div class="pro-gift-dmg">-55m Petir</div></div>
-      </div>
-      <div class="pro-gift-box">
-        <div class="pro-gift-icon">??</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Rosa/Bom (10c)</div><div class="pro-gift-dmg">-85m Ledakan</div></div>
-      </div>
-      <div class="pro-gift-box">
-        <div class="pro-gift-icon">??</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Parfum (20c)</div><div class="pro-gift-dmg">-95m Palu</div></div>
-      </div>
-      <div class="pro-gift-box">
-        <div class="pro-gift-icon">??</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Donat (30c)</div><div class="pro-gift-dmg">-120m UFO</div></div>
-      </div>
-      <div class="pro-gift-box">
-        <div class="pro-gift-icon">??</div>
-        <div class="pro-gift-meta"><div class="pro-gift-name">Sultan (100c+)</div><div class="pro-gift-dmg">-180m Meteor</div></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="pro-card">
-    <div class="pro-header">
-      <span>?? CARA REQUEST LAGU</span>
-      <span style="color:#1db954;">SPOTIFY FULL</span>
-    </div>
-    <div class="pro-sub">
-      Penonton bisa request lagu di kolom komentar Live dengan mengetik:<br/>
-      <b style="color:#4ade80;">req Sesi Potret</b> atau <b style="color:#4ade80;">req My Heart</b>
-    </div>
-  </div>
-</div>
-
-<!-- WIDGET SPOTIFY FULL DURATION -->
-<div id="sp-player">
-  <div class="sp-top">
-    <div id="sp-disc-wrap">
-      <div id="yt-bgm-frame"></div>
-    </div>
-    <div class="sp-info">
-      <div class="sp-badge-row">
-        <span id="sp-badge">SPOTIFY FULL TRACK</span>
-        <span id="sp-time">00:00 / 00:00</span>
-      </div>
-      <div id="sp-title">Sesi Potret (Teh Hijau)</div>
-      <div id="sp-artist">Raim Laode</div>
-    </div>
-    <div class="sp-controls">
-      <button class="sp-btn" id="sp-prev" title="Lagu Sebelumnya">&#9664;</button>
-      <button class="sp-btn main" id="sp-toggle" title="Play/Pause">&#9654;</button>
-      <button class="sp-btn" id="sp-next" title="Lagu Berikutnya">&#9654;&#9654;</button>
-    </div>
-  </div>
-  <div class="sp-progress-bg"><div id="sp-progress-fill"></div></div>
-  <div class="sp-search-row">
-    <input type="text" id="sp-search-input" placeholder="Ketik lagu (Full 1 Lagu Penuh)" />
-    <button id="sp-search-btn">Putar</button>
-    <input type="range" id="sp-vol" min="0" max="100" step="5" value="65" title="Volume Musik" />
-  </div>
-</div>
-
-<script>
-(function() {
-  if (window.__PRO_ARENA_LOADED) return;
-  window.__PRO_ARENA_LOADED = true;
-
-  // 1. SINKRONISASI ANTAR TAB (Mencegah suara tabrakan jika dibuka di Chrome + Live Studio sekaligus)
-  const tabId = Math.random().toString(36).slice(2);
-  const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('ptrgenz_bgm_lock') : null;
-
-  function claimAudioMaster() {
-    if (syncChannel) syncChannel.postMessage({ type: 'CLAIM_MASTER', id: tabId });
-    try { localStorage.setItem('ptrgenz_bgm_master', tabId); } catch (e) {}
-  }
-
-  // 2. DAFTAR LAGU HITS FULL DURASI
-  const defaultTracks = [
-    { title: 'Sesi Potret (Teh Hijau)', artist: 'Raim Laode', q: 'Raim Laode Sesi Potret lirik' },
-    { title: 'Training Season', artist: 'Dua Lipa', q: 'Dua Lipa Training Season lirik terjemahan' },
-    { title: 'My Heart', artist: 'Irwansyah & Acha Septriasa', q: 'Irwansyah Acha Septriasa My Heart lirik' },
-    { title: 'Kaulah Kamuku', artist: 'Fatin & The Overtunes', q: 'Fatin Kaulah Kamuku lirik' },
-    { title: 'Jikalau Kau Cinta', artist: 'Judika', q: 'Judika Jikalau Kau Cinta lirik' },
-    { title: 'Komang', artist: 'Raim Laode', q: 'Raim Laode Komang lirik' },
-    { title: 'Penjaga Hati', artist: 'Nadhif Basalamah', q: 'Nadhif Basalamah Penjaga Hati lirik' },
-    { title: 'Gala Bunga Matahari', artist: 'Sal Priadi', q: 'Sal Priadi Gala Bunga Matahari lirik' },
-    { title: 'Kupu-Kupu', artist: 'Tiara Andini', q: 'Tiara Andini Kupu Kupu lirik' },
-    { title: 'Tak Segampang Itu', artist: 'Anggi Marito', q: 'Anggi Marito Tak Segampang Itu lirik' },
-    { title: 'Sial', artist: 'Mahalini', q: 'Mahalini Sial lirik' },
-    { title: 'Untungnya Hidup Harus Tetap Berjalan', artist: 'Bernadya', q: 'Bernadya Untungnya Hidup Harus Tetap Berjalan lirik' }
-  ];
-
-  let tracks = [...defaultTracks];
-  let idx = 0;
-  let userVol = 65;
-  let isPlaying = false;
-  let loadToken = 0; // Pengunci agar tidak pernah ada 2 proses load lagu bersamaan
-  let ytPlayer = null;
-  let ytReady = false;
-  let candidateIds = [];
-  let candidateIdx = 0;
-  let localAudio = new Audio();
-  let usingLocalMp3 = false;
-
-  const badgeEl = document.getElementById('sp-badge');
-  const timeEl = document.getElementById('sp-time');
-  const titleEl = document.getElementById('sp-title');
-  const artistEl = document.getElementById('sp-artist');
-  const progFill = document.getElementById('sp-progress-fill');
-  const toggleBtn = document.getElementById('sp-toggle');
-  const prevBtn = document.getElementById('sp-prev');
-  const nextBtn = document.getElementById('sp-next');
-  const volInput = document.getElementById('sp-vol');
-  const searchInput = document.getElementById('sp-search-input');
-  const searchBtn = document.getElementById('sp-search-btn');
-  const feedList = document.getElementById('pro-feed-list');
-  const toastEl = document.getElementById('pro-toast');
-
-  function fmtTime(sec) {
-    if (!sec || isNaN(sec) || sec < 0) return '00:00';
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60);
-    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
-  }
-
-  function showToast(msg) {
-    if (!toastEl) return;
-    toastEl.textContent = msg;
-    toastEl.classList.add('show');
-    clearTimeout(window.__toastTimer);
-    window.__toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3500);
-  }
-
-  function addFeedItem(text, type) {
-    if (!feedList) return;
-    const div = document.createElement('div');
-    div.className = 'pro-feed-item' + (type ? ' ' + type : '');
-    div.textContent = text;
-    feedList.prepend(div);
-    while (feedList.children.length > 5) {
-      feedList.removeChild(feedList.lastChild);
+    // Kontrol Pedal Gas / Rem & Spasi
+    function toggleGas(state) {
+      autoGas = state;
+      pedalAuto.classList.toggle('active', autoGas);
+      pedalStop.classList.toggle('active', !autoGas);
     }
-  }
-
-  function stopAllMusic() {
-    try {
-      localAudio.pause();
-      localAudio.currentTime = 0;
-    } catch (e) {}
-    try {
-      if (ytReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
-    } catch (e) {}
-  }
-
-  if (syncChannel) {
-    syncChannel.onmessage = (ev) => {
-      if (ev.data && ev.data.type === 'CLAIM_MASTER' && ev.data.id !== tabId) {
-        stopAllMusic();
-        isPlaying = false;
-        toggleBtn.innerHTML = '&#9654;';
-        badgeEl.textContent = 'AKTIF DI TAB LAIN';
-      }
-    };
-  }
-
-  function setPlayStateUI(playing) {
-    isPlaying = playing;
-    toggleBtn.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
-    badgeEl.textContent = playing ? 'FULL LAGU AKTIF' : 'PAUSED / KLIK PLAY';
-  }
-
-  // Muat YouTube Player (Tampil langsung di dalam bulatan piringan #sp-disc-wrap agar tidak diblokir Chrome)
-  const ytScript = document.createElement('script');
-  ytScript.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(ytScript);
-
-  window.onYouTubeIframeAPIReady = function() {
-    ytPlayer = new YT.Player('yt-bgm-frame', {
-      height: '48',
-      width: '48',
-      playerVars: {
-        autoplay: 1,
-        controls: 0,
-        disablekb: 1,
-        fs: 0,
-        modestbranding: 1,
-        playsinline: 1,
-        rel: 0
-      },
-      events: {
-        onReady: () => {
-          ytReady = true;
-          ytPlayer.setVolume(userVol);
-          loadTrack(0, true);
-        },
-        onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) {
-            claimAudioMaster();
-            setPlayStateUI(true);
-          } else if (e.data === YT.PlayerState.PAUSED) {
-            setPlayStateUI(false);
-          } else if (e.data === YT.PlayerState.ENDED) {
-            // HANYA PINDAH LAGU JIKA 1 LAGU PENUH SUDAH BENAR-BENAR SELESAI
-            const dur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
-            const cur = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
-            if (dur > 0 && cur >= dur - 3) {
-              loadTrack(idx + 1, true);
-            }
-          }
-        },
-        onError: () => {
-          // Jika video ke-1 diblokir embed oleh pemiliknya, coba video lirik ke-2, ke-3, dst.
-          candidateIdx++;
-          if (candidateIdx < candidateIds.length && ytReady) {
-            ytPlayer.loadVideoById(candidateIds[candidateIdx]);
-          } else {
-            // Jika semua gagal, baru pindah ke lagu berikutnya setelah 2 detik
-            setTimeout(() => loadTrack(idx + 1, true), 2000);
-          }
-        }
+    pedalStop.addEventListener('click', () => toggleGas(false));
+    pedalAuto.addEventListener('click', () => toggleGas(true));
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        toggleGas(!autoGas);
       }
     });
-  };
 
-  // Update Progress Bar & Waktu Lagu setiap 500ms
-  setInterval(() => {
-    if (usingLocalMp3 && !localAudio.paused && localAudio.duration) {
-      const cur = localAudio.currentTime;
-      const dur = localAudio.duration;
-      timeEl.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
-      progFill.style.width = Math.min((cur / dur) * 100, 100) + '%';
-    } else if (!usingLocalMp3 && ytReady && ytPlayer && isPlaying && ytPlayer.getDuration) {
-      const dur = ytPlayer.getDuration();
-      const cur = ytPlayer.getCurrentTime();
-      if (dur > 0) {
-        timeEl.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
-        progFill.style.width = Math.min((cur / dur) * 100, 100) + '%';
-      }
-    }
-  }, 500);
-
-  function loadTrack(newIdx, autoPlay) {
-    if (!tracks.length) return;
-    loadToken++;
-    const currentToken = loadToken;
-
-    stopAllMusic();
-    progFill.style.width = '0%';
-    timeEl.textContent = '00:00 / --:--';
-
-    idx = (newIdx + tracks.length) % tracks.length;
-    const item = tracks[idx];
-    titleEl.textContent = item.title;
-    artistEl.textContent = item.artist;
-    badgeEl.textContent = 'MEMUAT LAGU FULL...';
-
-    // Jika file .mp3 lokal dari folder C:\projects\tiktok-cliff-game\mp3
-    if (item.url) {
-      usingLocalMp3 = true;
-      localAudio.src = item.url;
-      localAudio.volume = userVol / 100;
-      if (autoPlay) {
-        claimAudioMaster();
-        localAudio.play().then(() => setPlayStateUI(true)).catch(() => setPlayStateUI(false));
-      }
-      return;
-    }
-
-    usingLocalMp3 = false;
-    const searchQ = item.q || (item.title + ' ' + item.artist);
-    fetch('http://localhost:3000/yt-search?q=' + encodeURIComponent(searchQ))
-      .then(r => r.json())
-      .then(data => {
-        if (currentToken !== loadToken) return; // Batalkan jika sudah ganti lagu lain
-        if (data && Array.isArray(data.videoIds) && data.videoIds.length > 0 && ytReady) {
-          candidateIds = data.videoIds;
-          candidateIdx = 0;
-          claimAudioMaster();
-          ytPlayer.loadVideoById(candidateIds[0]);
-          ytPlayer.setVolume(userVol);
-          if (!autoPlay) ytPlayer.pauseVideo();
-        } else {
-          badgeEl.textContent = 'LAGU TIDAK DITEMUKAN';
-        }
-      })
-      .catch(() => {
-        if (currentToken !== loadToken) return;
-        badgeEl.textContent = 'CEK SERVER.JS';
+    // Klik kapsul Gift di kiri/kanan untuk tes langsung
+    document.querySelectorAll('.gift-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        spawnLiveUnit({
+          dir: pill.dataset.dir,
+          type: pill.dataset.type,
+          label: pill.dataset.label,
+          power: Number(pill.dataset.power),
+          nickname: 'TesStreamer',
+          giftName: pill.dataset.label,
+          count: 1
+        });
       });
-  }
+    });
 
-  localAudio.addEventListener('ended', () => {
-    if (usingLocalMp3) loadTrack(idx + 1, true);
-  });
+    // Tombol Menu & Tombol Musik
+    const colTurun = document.getElementById('col-turun');
+    const colNaik = document.getElementById('col-naik');
+    const spPlayer = document.getElementById('sp-player');
 
-  function playCustomRequest(queryText, requesterName) {
-    if (!queryText) return;
-    const newItem = {
-      title: queryText,
-      artist: requesterName ? ('Request @' + requesterName) : 'Pencarian Lagu Full',
-      q: queryText + ' lirik'
-    };
-    tracks.splice(idx + 1, 0, newItem);
-    addFeedItem('?? ' + (requesterName || 'Host') + ' memutar: ' + queryText, 'req');
-    showToast('?? Memutar Lagu: ' + queryText);
-    loadTrack(idx + 1, true);
-  }
+    document.getElementById('btn-toggle-ui').addEventListener('click', () => {
+      const hidden = colTurun.style.display === 'none';
+      colTurun.style.display = hidden ? 'flex' : 'none';
+      colNaik.style.display = hidden ? 'flex' : 'none';
+    });
 
-  toggleBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    claimAudioMaster();
-    if (usingLocalMp3) {
-      if (localAudio.paused) localAudio.play().then(() => setPlayStateUI(true)).catch(() => {});
-      else { localAudio.pause(); setPlayStateUI(false); }
-    } else if (ytReady && ytPlayer) {
-      const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
-      if (state === YT.PlayerState.PLAYING) {
-        ytPlayer.pauseVideo();
-        setPlayStateUI(false);
-      } else {
-        ytPlayer.playVideo();
-        setPlayStateUI(true);
+    document.getElementById('btn-toggle-music').addEventListener('click', () => {
+      spPlayer.classList.toggle('minimized');
+    });
+
+    // ========================================================================
+    // B. SUARA BAHASA INDONESIA (TTS) + AUTO DUCKING MUSIK
+    // ========================================================================
+    let currentTtsAudio = null;
+    let userVol = 60;
+    let ytPlayer = null;
+    let ytReady = false;
+    let localAudio = new Audio();
+    let usingLocalMp3 = false;
+
+    function duckBgm(duck) {
+      const v = duck ? Math.min(Math.round(userVol * 0.22), 14) : userVol;
+      localAudio.volume = v / 100;
+      if (ytReady && ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(v);
+    }
+
+    function speakIndo(text) {
+      if (!text) return;
+      if (currentTtsAudio) {
+        currentTtsAudio.pause();
+        currentTtsAudio = null;
       }
-    }
-  });
-
-  nextBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    loadTrack(idx + 1, true);
-  });
-
-  prevBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    loadTrack(idx - 1, true);
-  });
-
-  volInput.addEventListener('input', (e) => {
-    userVol = parseInt(e.target.value, 10);
-    localAudio.volume = userVol / 100;
-    if (ytReady && ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(userVol);
-  });
-
-  searchBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const val = searchInput.value.trim();
-    if (val) {
-      playCustomRequest(val, '');
-      searchInput.value = '';
-    }
-  });
-
-  searchInput.addEventListener('keydown', (e) => {
-    e.stopPropagation();
-    if (e.key === 'Enter') {
-      const val = searchInput.value.trim();
-      if (val) {
-        playCustomRequest(val, '');
-        searchInput.value = '';
-      }
-    }
-  });
-
-  // Cek jika ada file .mp3 di C:\projects\tiktok-cliff-game\mp3
-  fetch('http://localhost:3000/playlist')
-    .then(r => r.json())
-    .then(localFiles => {
-      if (Array.isArray(localFiles) && localFiles.length > 0) {
-        tracks = [...localFiles, ...defaultTracks];
-      }
-    })
-    .catch(() => {});
-
-  // Hubungkan Socket.IO untuk Live Feed & Request Lagu Penonton
-  try {
-    if (window.io) {
-      const liveSocket = window.io('http://localhost:3000');
-      liveSocket.on('song-request', (d) => {
-        if (d && d.query) playCustomRequest(d.query, d.user || 'Penonton');
-      });
-      liveSocket.on('live-event', (ev) => {
-        if (!ev) return;
-        if (ev.kind === 'gift') {
-          addFeedItem('?? @' + ev.nickname + ' mengirim ' + ev.giftName + '!', 'gift');
-          showToast('?? GIFT MASUK: @' + ev.nickname + ' kirim ' + ev.giftName + '!');
-        } else if (ev.kind === 'chat') {
-          addFeedItem('?? @' + ev.nickname + ': ' + ev.comment, '');
-        } else if (ev.kind === 'boost') {
-          addFeedItem('?? @' + ev.nickname + ' tap-tap layar! (+Boost)', '');
-        }
-      });
-    }
-  } catch (e) {}
-
-  // Fungsi Auto-Ducking (Kecilkan volume musik sedikit saat suara TTS bicara)
-  function duckBgm(duck) {
-    const targetVol = duck ? Math.min(Math.round(userVol * 0.25), 15) : userVol;
-    localAudio.volume = targetVol / 100;
-    if (ytReady && ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(targetVol);
-  }
-
-  // 3. SUARA BAHASA INDONESIA + AUTO DUCKING
-  let currentTtsAudio = null;
-  const origSpeak = window.speechSynthesis ? window.speechSynthesis.speak.bind(window.speechSynthesis) : null;
-  const origCancel = window.speechSynthesis ? window.speechSynthesis.cancel.bind(window.speechSynthesis) : null;
-
-  function toIndonesianText(text) {
-    if (!text) return '';
-    return String(text)
-      .replace(/\bsent\b/gi, 'mengirim')
-      .replace(/\bjoined\b/gi, 'bergabung')
-      .replace(/\bliked\b/gi, 'menyukai live')
-      .replace(/\bthank you\b/gi, 'terima kasih')
-      .replace(/\bthanks\b/gi, 'makasih')
-      .replace(/\bwatch out\b/gi, 'awas hati-hati')
-      .replace(/\bdanger\b/gi, 'bahaya')
-      .replace(/\bvictory\b/gi, 'menang')
-      .replace(/\bwinner\b/gi, 'pemenang')
-      .replace(/\bgame over\b/gi, 'permainan berakhir')
-      .replace(/\blevel up\b/gi, 'naik level')
-      .replace(/\bboost\b/gi, 'dorongan')
-      .replace(/\bspawned\b/gi, 'memunculkan');
-  }
-
-  if (window.speechSynthesis) {
-    window.speechSynthesis.cancel = function() {
-      if (currentTtsAudio) { currentTtsAudio.pause(); currentTtsAudio = null; }
-      duckBgm(false);
-      if (origCancel) origCancel();
-    };
-    window.speechSynthesis.speak = function(utterance) {
-      if (!utterance || !utterance.text) return;
-      const cleanText = toIndonesianText(utterance.text);
-      if (currentTtsAudio) { currentTtsAudio.pause(); currentTtsAudio = null; }
-      const audio = new Audio('http://localhost:3000/tts?text=' + encodeURIComponent(cleanText));
+      const audio = new Audio('http://localhost:3000/tts?text=' + encodeURIComponent(text));
       audio.playbackRate = 1.15;
       currentTtsAudio = audio;
       duckBgm(true);
       audio.onended = () => duckBgm(false);
       audio.onerror = () => duckBgm(false);
-      audio.play().catch(() => {
-        duckBgm(false);
-        if (origSpeak) {
-          utterance.text = cleanText;
-          utterance.lang = 'id-ID';
-          origSpeak(utterance);
+      audio.play().catch(() => duckBgm(false));
+    }
+
+    // ========================================================================
+    // C. KONEKSI SOCKET.IO KE TIKTOK LIVE @ptrgenz
+    // ========================================================================
+    const statusBadge = document.getElementById('live-status-badge');
+    try {
+      if (window.io) {
+        const socket = window.io('http://localhost:3000');
+        socket.on('connect', () => {
+          socket.emit('join-live', 'ptrgenz');
+        });
+        socket.on('status', (st) => {
+          if (st && st.text) statusBadge.textContent = st.text;
+        });
+        socket.on('live-event', (ev) => {
+          if (ev) spawnLiveUnit(ev);
+        });
+        socket.on('song-request', (req) => {
+          if (req && req.query) playCustomSong(req.query, req.user);
+        });
+      }
+    } catch (e) {}
+
+    // ========================================================================
+    // D. SPOTIFY FULL LAGU PLAYER (1 LAGU PENUH BARU PINDAH + ANTI TABRAKAN)
+    // ========================================================================
+    const tabId = Math.random().toString(36).slice(2);
+    const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('ptrgenz_mbg_audio') : null;
+    function claimAudioMaster() {
+      if (syncChannel) syncChannel.postMessage({ type: 'CLAIM', id: tabId });
+    }
+    if (syncChannel) {
+      syncChannel.onmessage = (e) => {
+        if (e.data && e.data.type === 'CLAIM' && e.data.id !== tabId) {
+          localAudio.pause();
+          if (ytReady && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+        }
+      };
+    }
+
+    const defaultTracks = [
+      { title: 'Sesi Potret (Teh Hijau)', artist: 'Raim Laode', q: 'Raim Laode Sesi Potret lirik' },
+      { title: 'Training Season', artist: 'Dua Lipa', q: 'Dua Lipa Training Season lyrics' },
+      { title: 'My Heart', artist: 'Irwansyah & Acha Septriasa', q: 'Irwansyah Acha Septriasa My Heart lirik' },
+      { title: 'Kaulah Kamuku', artist: 'Fatin & The Overtunes', q: 'Fatin Kaulah Kamuku lirik' },
+      { title: 'Jikalau Kau Cinta', artist: 'Judika', q: 'Judika Jikalau Kau Cinta lirik' },
+      { title: 'Komang', artist: 'Raim Laode', q: 'Raim Laode Komang lirik' },
+      { title: 'Penjaga Hati', artist: 'Nadhif Basalamah', q: 'Nadhif Basalamah Penjaga Hati lirik' },
+      { title: 'Gala Bunga Matahari', artist: 'Sal Priadi', q: 'Sal Priadi Gala Bunga Matahari lirik' }
+    ];
+
+    let tracks = [...defaultTracks];
+    let idx = 0;
+    let loadToken = 0;
+    let candidateIds = [];
+    let candidateIdx = 0;
+    let isPlaying = false;
+
+    const titleEl = document.getElementById('sp-title');
+    const artistEl = document.getElementById('sp-artist');
+    const timeEl = document.getElementById('sp-time');
+    const spProg = document.getElementById('sp-progress-fill');
+    const toggleBtn = document.getElementById('sp-toggle');
+    const searchInput = document.getElementById('sp-search-input');
+
+    function fmt(s) {
+      if (!s || isNaN(s) || s < 0) return '00:00';
+      const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+      return (m < 10 ? '0' + m : m) + ':' + (sec < 10 ? '0' + sec : sec);
+    }
+
+    const ytTag = document.createElement('script');
+    ytTag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(ytTag);
+
+    window.onYouTubeIframeAPIReady = function() {
+      ytPlayer = new YT.Player('yt-bgm-frame', {
+        height: '44',
+        width: '44',
+        playerVars: { autoplay: 1, controls: 0, playsinline: 1, rel: 0 },
+        events: {
+          onReady: () => {
+            ytReady = true;
+            ytPlayer.setVolume(userVol);
+            loadTrack(0, true);
+          },
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.PLAYING) {
+              claimAudioMaster();
+              isPlaying = true;
+              toggleBtn.innerHTML = '&#10074;&#10074;';
+            } else if (e.data === YT.PlayerState.PAUSED) {
+              isPlaying = false;
+              toggleBtn.innerHTML = '&#9654;';
+            } else if (e.data === YT.PlayerState.ENDED) {
+              const dur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
+              const cur = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
+              if (dur > 0 && cur >= dur - 3) loadTrack(idx + 1, true);
+            }
+          },
+          onError: () => {
+            candidateIdx++;
+            if (candidateIdx < candidateIds.length && ytReady) {
+              ytPlayer.loadVideoById(candidateIds[candidateIdx]);
+            } else {
+              setTimeout(() => loadTrack(idx + 1, true), 2000);
+            }
+          }
         }
       });
     };
-  }
-})();
-</script>
-<!-- ID_TTS_PATCH_END -->
+
+    setInterval(() => {
+      if (!usingLocalMp3 && ytReady && ytPlayer && isPlaying && ytPlayer.getDuration) {
+        const d = ytPlayer.getDuration(), c = ytPlayer.getCurrentTime();
+        if (d > 0) {
+          timeEl.textContent = fmt(c) + ' / ' + fmt(d);
+          spProg.style.width = Math.min((c / d) * 100, 100) + '%';
+        }
+      }
+    }, 500);
+
+    function loadTrack(newIdx, autoPlay) {
+      if (!tracks.length) return;
+      loadToken++;
+      const token = loadToken;
+      idx = (newIdx + tracks.length) % tracks.length;
+      const t = tracks[idx];
+      titleEl.textContent = t.title;
+      artistEl.textContent = t.artist;
+
+      if (t.url) {
+        usingLocalMp3 = true;
+        localAudio.src = t.url;
+        localAudio.volume = userVol / 100;
+        if (autoPlay) localAudio.play().catch(() => {});
+        return;
+      }
+
+      usingLocalMp3 = false;
+      fetch('http://localhost:3000/yt-search?q=' + encodeURIComponent(t.q || t.title))
+        .then(r => r.json())
+        .then(d => {
+          if (token !== loadToken) return;
+          if (d && Array.isArray(d.videoIds) && d.videoIds.length > 0 && ytReady) {
+            candidateIds = d.videoIds;
+            candidateIdx = 0;
+            claimAudioMaster();
+            ytPlayer.loadVideoById(candidateIds[0]);
+            ytPlayer.setVolume(userVol);
+          }
+        })
+        .catch(() => {});
+    }
+
+    function playCustomSong(q, user) {
+      if (!q) return;
+      tracks.splice(idx + 1, 0, { title: q, artist: user ? ('Req @' + user) : 'Pencarian', q: q + ' lirik' });
+      loadTrack(idx + 1, true);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      if (ytReady && ytPlayer) {
+        if (isPlaying) ytPlayer.pauseVideo();
+        else ytPlayer.playVideo();
+      }
+    });
+    document.getElementById('sp-next').addEventListener('click', () => loadTrack(idx + 1, true));
+    document.getElementById('sp-prev').addEventListener('click', () => loadTrack(idx - 1, true));
+    document.getElementById('sp-vol').addEventListener('input', (e) => {
+      userVol = parseInt(e.target.value, 10);
+      if (ytReady && ytPlayer) ytPlayer.setVolume(userVol);
+    });
+    document.getElementById('sp-search-btn').addEventListener('click', () => {
+      const v = searchInput.value.trim();
+      if (v) { playCustomSong(v, ''); searchInput.value = ''; }
+    });
+  })();
+  </script>
 </body>
 </html>
