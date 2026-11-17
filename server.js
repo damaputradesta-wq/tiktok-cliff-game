@@ -23,6 +23,7 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/mp3', express.static(path.join(__dirname, 'mp3')));
 
+// Endpoint Daftar Lagu Lokal (.mp3)
 app.get('/playlist', (req, res) => {
   const dir = path.join(__dirname, 'mp3');
   if (!fs.existsSync(dir)) return res.json([]);
@@ -36,9 +37,38 @@ app.get('/playlist', (req, res) => {
   res.json(files);
 });
 
+// Endpoint Pencarian Lagu Full Durasi (YouTube Lirik Audio - Anti Blokir Embed)
+app.get('/yt-search', (req, res) => {
+  const q = (req.query.q || '').toString().trim();
+  if (!q) return res.json({ videoIds: [] });
+
+  const searchUrl = 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q + ' lirik audio indonesia');
+  https.get(searchUrl, {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8'
+    }
+  }, (ytRes) => {
+    let html = '';
+    ytRes.on('data', chunk => html += chunk);
+    ytRes.on('end', () => {
+      const regex = /"videoId":"([a-zA-Z0-9_-]{11})"/g;
+      const ids = [];
+      let match;
+      while ((match = regex.exec(html)) !== null) {
+        if (!ids.includes(match[1])) ids.push(match[1]);
+        if (ids.length >= 10) break;
+      }
+      res.json({ videoIds: ids });
+    });
+  }).on('error', () => res.json({ videoIds: [] }));
+});
+
+// Endpoint Suara Bahasa Indonesia + Auto Translate
 app.get('/tts', (req, res) => {
   const rawText = (req.query.text || '').toString().trim();
   if (!rawText) return res.status(400).end();
+
   const trUrl = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=id&dt=t&q=' + encodeURIComponent(rawText);
   https.get(trUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (trRes) => {
     let body = '';
@@ -49,6 +79,7 @@ app.get('/tts', (req, res) => {
         const parsed = JSON.parse(body);
         if (parsed && parsed[0]) idText = parsed[0].map(item => item[0]).join('');
       } catch (e) {}
+
       const cleanText = idText.slice(0, 200);
       const ttsUrl = 'https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=id&q=' + encodeURIComponent(cleanText);
       https.get(ttsUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (audioRes) => {
@@ -88,13 +119,16 @@ function connectTikTokRoom() {
   if (activeConnection || isConnecting) return;
   isConnecting = true;
   if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+
   console.log('[TIKTOK] Mencoba menghubungkan ke Live @' + TARGET_USER + '...');
   io.emit('status', { state: 'connecting', text: 'Mencari sinyal Live @' + TARGET_USER + '...' });
+
   const tiktok = new LiveConnection(TARGET_USER, {
     processInitialData: false,
     enableExtendedGiftInfo: false,
     requestPollingIntervalMs: 2000
   });
+
   tiktok.connect().then((state) => {
     isConnecting = false;
     activeConnection = tiktok;
@@ -109,6 +143,7 @@ function connectTikTokRoom() {
     io.emit('status', { state: 'waiting', text: 'Menunggu @' + TARGET_USER + ' Live...' });
     retryTimer = setTimeout(() => { retryTimer = null; connectTikTokRoom(); }, retryMs);
   });
+
   tiktok.on('like', (data) => {
     const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'user';
     const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
@@ -116,12 +151,14 @@ function connectTikTokRoom() {
     const likeCount = data.likeCount || 1;
     io.emit('live-event', { kind: 'boost', user: uniqueId, nickname, avatar, power: Math.min(likeCount * 3, 35) });
   });
+
   tiktok.on('chat', (data) => {
     const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'user';
     const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
     const avatar = data.profilePictureUrl || (data.user && data.user.profilePicture && data.user.profilePicture.url && data.user.profilePicture.url[0]) || '';
     const comment = (data.comment || '').trim();
     console.log('[CHAT] @' + uniqueId + ': ' + comment);
+
     const reqMatch = comment.match(/^(?:!lagu|!play|req|request)\s+(.+)/i);
     if (reqMatch && reqMatch[1]) {
       const songQuery = reqMatch[1].trim().slice(0, 60);
@@ -130,6 +167,7 @@ function connectTikTokRoom() {
     }
     io.emit('live-event', { kind: 'chat', user: uniqueId, nickname, avatar, comment, power: 20 });
   });
+
   tiktok.on('gift', (data) => {
     const giftType = data.giftType ?? (data.giftDetails && data.giftDetails.giftType) ?? 0;
     if (giftType === 1 && !data.repeatEnd) return;
@@ -145,6 +183,7 @@ function connectTikTokRoom() {
     console.log('[GIFT MASUK] @' + uniqueId + ' kirim ' + gName + ' x' + count);
     io.emit('live-event', { kind: 'gift', id: challengeId, user: uniqueId, nickname, avatar, giftName: gName + (count > 1 ? ' x' + count : ''), giftImg, coins, pwr: Math.min(35 + coins * 8, 450) });
   });
+
   tiktok.on('streamEnd', () => { activeConnection = null; isConnecting = false; });
   tiktok.on('disconnected', () => { activeConnection = null; isConnecting = false; });
 }
@@ -160,8 +199,8 @@ io.on('connection', (socket) => {
 
 server.listen(3000, () => {
   console.log('====================================================');
-  console.log('SERVER AKTIF! MUSIK SPOTIFY + SUARA INDONESIA SIAP!');
-  console.log('URL LIVE STUDIO: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&musik=1');
+  console.log('SERVER FULL MUSIK + VISUAL UPGRADE AKTIF (@ptrgenz)');
+  console.log('URL LIVE STUDIO: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&v=3');
   console.log('====================================================');
   connectTikTokRoom();
 });

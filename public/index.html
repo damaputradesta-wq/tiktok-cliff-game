@@ -987,238 +987,673 @@
 
 
 
+
 <!-- ID_TTS_PATCH_START -->
 <style>
+  /* BACKGROUND CYBER NEON WIDESCREEN */
+  body {
+    background: radial-gradient(circle at 50% 20%, #131c38 0%, #070b16 55%, #03050a 100%) !important;
+    overflow: hidden !important;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+    background-size: 42px 42px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* PERCANTIK CANVAS & KARTU BAWAAN GAME */
+  canvas {
+    border-left: 2px solid rgba(0, 229, 255, 0.45) !important;
+    border-right: 2px solid rgba(0, 229, 255, 0.45) !important;
+    box-shadow: 0 0 50px rgba(0, 229, 255, 0.22), 0 0 90px rgba(168, 85, 247, 0.15) !important;
+  }
+
+  /* SIDEBAR KIRI & KANAN UNTUK LAYAR LEBAR */
+  .pro-side-panel {
+    position: fixed;
+    top: 18px;
+    width: 280px;
+    z-index: 9990;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #fff;
+    pointer-events: none;
+  }
+  #pro-left-panel { left: 18px; }
+  #pro-right-panel { right: 18px; }
+
+  @media (max-width: 1050px) {
+    #pro-left-panel, #pro-right-panel { display: none !important; }
+  }
+
+  .pro-card {
+    background: linear-gradient(145deg, rgba(16, 24, 48, 0.88), rgba(9, 13, 26, 0.92));
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    border-radius: 16px;
+    padding: 12px 14px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+  }
+  .pro-card.purple { border-color: rgba(192, 132, 252, 0.4); }
+  .pro-card.gold { border-color: rgba(250, 204, 21, 0.45); }
+
+  .pro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: #38bdf8;
+    margin-bottom: 8px;
+  }
+  .pro-live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 800;
+  }
+  .pro-dot {
+    width: 7px;
+    height: 7px;
+    background: #ef4444;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #ef4444;
+    animation: proPulse 1.2s infinite;
+  }
+  @keyframes proPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.35); opacity: 0.5; }
+  }
+
+  .pro-streamer-name {
+    font-size: 18px;
+    font-weight: 900;
+    background: linear-gradient(90deg, #fff, #38bdf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+  .pro-sub { font-size: 11px; color: #94a3b8; line-height: 1.4; }
+
+  /* LIVE FEED AKTIVITAS */
+  #pro-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 230px;
+    overflow: hidden;
+  }
+  .pro-feed-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 3px solid #38bdf8;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 11px;
+    animation: slideInFeed 0.25s ease-out;
+  }
+  .pro-feed-item.gift { border-left-color: #facc15; background: rgba(250, 204, 21, 0.1); }
+  .pro-feed-item.req { border-left-color: #1db954; background: rgba(29, 185, 84, 0.12); }
+  @keyframes slideInFeed {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* GRID ARSENAL GIFT KANAN */
+  .pro-gift-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .pro-gift-box {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 10px;
+    padding: 7px 8px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .pro-gift-icon { font-size: 18px; }
+  .pro-gift-meta { flex: 1; overflow: hidden; }
+  .pro-gift-name { font-size: 11px; font-weight: 700; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pro-gift-dmg { font-size: 10px; font-weight: 800; color: #f87171; }
+  .pro-gift-box.boost .pro-gift-dmg { color: #4ade80; }
+
+  /* BANNER NOTIFIKASI GIFT DI TENGAH ATAS */
+  #pro-toast {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    z-index: 99999;
+    background: linear-gradient(90deg, #ec4899, #8b5cf6, #06b6d4);
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 99px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 8px 25px rgba(236, 72, 153, 0.55);
+    transition: transform 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  #pro-toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* SPOTIFY PRO WIDGET (FULL DURATION + PROGRESS BAR) */
   #sp-player {
     position: fixed !important;
     bottom: 16px !important;
-    left: 16px !important;
+    left: 18px !important;
     z-index: 2147483647 !important;
     display: flex !important;
     flex-direction: column !important;
     gap: 7px !important;
-    background: rgba(15, 15, 15, 0.95) !important;
+    background: linear-gradient(160deg, rgba(18, 18, 18, 0.96), rgba(10, 14, 20, 0.98)) !important;
     border: 2px solid #1db954 !important;
     border-radius: 16px !important;
-    padding: 10px 12px !important;
+    padding: 10px 13px !important;
     color: #fff !important;
     font-family: 'Segoe UI', Arial, sans-serif !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.85) !important;
-    width: 300px !important;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.85), 0 0 20px rgba(29, 185, 84, 0.25) !important;
+    width: 305px !important;
   }
   .sp-top { display: flex; align-items: center; gap: 10px; }
-  #sp-disc {
-    width: 44px;
-    height: 44px;
+  #sp-disc-wrap {
+    position: relative;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
-    background: radial-gradient(circle, #1db954 20%, #111 25%, #222 65%, #1db954 100%);
-    background-size: cover;
-    background-position: center;
+    overflow: hidden;
     flex-shrink: 0;
     border: 2px solid #1db954;
-    animation: spSpin 4s linear infinite;
-    animation-play-state: paused;
+    background: radial-gradient(circle, #1db954 20%, #111 25%, #222 65%, #1db954 100%);
+    box-shadow: 0 0 12px rgba(29, 185, 84, 0.4);
   }
-  #sp-disc.playing { animation-play-state: running; }
-  @keyframes spSpin { 100% { transform: rotate(360deg); } }
+  #yt-bgm-frame {
+    width: 48px !important;
+    height: 48px !important;
+    border: none !important;
+    pointer-events: none !important;
+    transform: scale(1.35);
+  }
   .sp-info { flex: 1; overflow: hidden; }
-  #sp-badge { font-size: 10px; color: #1db954; font-weight: 800; text-transform: uppercase; }
-  #sp-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
-  #sp-artist { font-size: 11px; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sp-controls { display: flex; align-items: center; gap: 5px; }
-  .sp-btn {
+  .sp-badge-row { display: flex; align-items: center; justify-content: space-between; }
+  #sp-badge { font-size: 9.5px; color: #1db954; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; }
+  #sp-time { font-size: 10px; color: #9ca3af; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #sp-title { font-size: 13px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; margin-top: 1px; }
+  #sp-artist { font-size: 11px; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* PROGRESS BAR DURASI LAGU */
+  .sp-progress-bg {
+    width: 100%;
+    height: 5px;
     background: #2a2a2a;
-    border: 1px solid #444;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  #sp-progress-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #1db954, #4ade80);
+    border-radius: 99px;
+    transition: width 0.4s linear;
+  }
+
+  .sp-controls { display: flex; align-items: center; gap: 4px; }
+  .sp-btn {
+    background: #262626;
+    border: 1px solid #3f3f46;
     color: #fff;
-    width: 28px;
-    height: 28px;
+    width: 27px;
+    height: 27px;
     border-radius: 50%;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .sp-btn.main { background: #1db954; color: #000; border: none; font-weight: bold; width: 32px; height: 32px; }
+  .sp-btn.main { background: #1db954; color: #000; border: none; font-weight: bold; width: 31px; height: 31px; }
+  .sp-btn.active-loop { border-color: #1db954; color: #1db954; }
   .sp-search-row { display: flex; gap: 5px; align-items: center; }
   #sp-search-input {
     flex: 1;
-    background: #222;
-    border: 1px solid #444;
+    background: #1f2937;
+    border: 1px solid #374151;
     border-radius: 8px;
     color: #fff;
     font-size: 11px;
     padding: 5px 8px;
     outline: none;
   }
+  #sp-search-input:focus { border-color: #1db954; }
   #sp-search-btn {
     background: #1db954;
     color: #000;
     border: none;
     border-radius: 8px;
     font-size: 11px;
-    font-weight: 700;
-    padding: 5px 10px;
+    font-weight: 800;
+    padding: 5px 9px;
     cursor: pointer;
   }
-  #sp-vol { width: 55px; accent-color: #1db954; cursor: pointer; }
+  #sp-vol { width: 50px; accent-color: #1db954; cursor: pointer; }
 </style>
 
-<div id="sp-player">
-  <div class="sp-top">
-    <div id="sp-disc"></div>
-    <div class="sp-info">
-      <div id="sp-badge">SPOTIFY HITS AKTIF</div>
-      <div id="sp-title">Memuat Sesi Potret...</div>
-      <div id="sp-artist">Klik tombol Play / Layar</div>
+<!-- NOTIFIKASI TOAST TENGAH -->
+<div id="pro-toast">?? Selamat Datang di Arena Live @ptrgenz!</div>
+
+<!-- PANEL KIRI: INFO STREAM & LIVE FEED INTERAKSI -->
+<div id="pro-left-panel" class="pro-side-panel">
+  <div class="pro-card">
+    <div class="pro-header">
+      <span>ARENA PANJAT TEBING</span>
+      <span class="pro-live-pill"><span class="pro-dot"></span> LIVE</span>
     </div>
-    <div class="sp-controls">
-      <button class="sp-btn" id="sp-prev" title="Sebelumnya">&#9664;</button>
-      <button class="sp-btn main" id="sp-toggle" title="Play/Pause">&#9654;</button>
-      <button class="sp-btn" id="sp-next" title="Berikutnya">&#9654;&#9654;</button>
+    <div class="pro-streamer-name">@ptrgenz</div>
+    <div class="pro-sub">Tap-tap layar & komen untuk bantu naik! Kirim Gift untuk menjatuhkan pendaki!</div>
+  </div>
+
+  <div class="pro-card purple">
+    <div class="pro-header" style="color:#c084fc;">
+      <span>? AKTIVITAS PENONTON LIVE</span>
+      <span id="pro-event-count">AKTIF</span>
+    </div>
+    <div id="pro-feed-list">
+      <div class="pro-feed-item">?? Menunggu komentar & gift penonton...</div>
+      <div class="pro-feed-item req">?? Ketik <b>req judul lagu</b> di chat untuk request musik!</div>
     </div>
   </div>
+</div>
+
+<!-- PANEL KANAN: PANDUAN SERANGAN GIFT & REQUEST MUSIK -->
+<div id="pro-right-panel" class="pro-side-panel">
+  <div class="pro-card gold">
+    <div class="pro-header" style="color:#facc15;">
+      <span>?? DAFTAR EFEK GIFT LIVE</span>
+      <span>AUTO TRIGGER</span>
+    </div>
+    <div class="pro-gift-grid">
+      <div class="pro-gift-box boost">
+        <div class="pro-gift-icon">??</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Tap / Komen</div><div class="pro-gift-dmg">+20m Boost</div></div>
+      </div>
+      <div class="pro-gift-box">
+        <div class="pro-gift-icon">??</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Mawar (1c)</div><div class="pro-gift-dmg">-45m Gergaji</div></div>
+      </div>
+      <div class="pro-gift-box">
+        <div class="pro-gift-icon">??</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Es Krim (2c)</div><div class="pro-gift-dmg">-50m Beku</div></div>
+      </div>
+      <div class="pro-gift-box">
+        <div class="pro-gift-icon">?</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Jari Hati (5c)</div><div class="pro-gift-dmg">-55m Petir</div></div>
+      </div>
+      <div class="pro-gift-box">
+        <div class="pro-gift-icon">??</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Rosa/Bom (10c)</div><div class="pro-gift-dmg">-85m Ledakan</div></div>
+      </div>
+      <div class="pro-gift-box">
+        <div class="pro-gift-icon">??</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Parfum (20c)</div><div class="pro-gift-dmg">-95m Palu</div></div>
+      </div>
+      <div class="pro-gift-box">
+        <div class="pro-gift-icon">??</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Donat (30c)</div><div class="pro-gift-dmg">-120m UFO</div></div>
+      </div>
+      <div class="pro-gift-box">
+        <div class="pro-gift-icon">??</div>
+        <div class="pro-gift-meta"><div class="pro-gift-name">Sultan (100c+)</div><div class="pro-gift-dmg">-180m Meteor</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pro-card">
+    <div class="pro-header">
+      <span>?? CARA REQUEST LAGU</span>
+      <span style="color:#1db954;">SPOTIFY FULL</span>
+    </div>
+    <div class="pro-sub">
+      Penonton bisa request lagu di kolom komentar Live dengan mengetik:<br/>
+      <b style="color:#4ade80;">req Sesi Potret</b> atau <b style="color:#4ade80;">req My Heart</b>
+    </div>
+  </div>
+</div>
+
+<!-- WIDGET SPOTIFY FULL DURATION -->
+<div id="sp-player">
+  <div class="sp-top">
+    <div id="sp-disc-wrap">
+      <div id="yt-bgm-frame"></div>
+    </div>
+    <div class="sp-info">
+      <div class="sp-badge-row">
+        <span id="sp-badge">SPOTIFY FULL TRACK</span>
+        <span id="sp-time">00:00 / 00:00</span>
+      </div>
+      <div id="sp-title">Sesi Potret (Teh Hijau)</div>
+      <div id="sp-artist">Raim Laode</div>
+    </div>
+    <div class="sp-controls">
+      <button class="sp-btn" id="sp-prev" title="Lagu Sebelumnya">&#9664;</button>
+      <button class="sp-btn main" id="sp-toggle" title="Play/Pause">&#9654;</button>
+      <button class="sp-btn" id="sp-next" title="Lagu Berikutnya">&#9654;&#9654;</button>
+    </div>
+  </div>
+  <div class="sp-progress-bg"><div id="sp-progress-fill"></div></div>
   <div class="sp-search-row">
-    <input type="text" id="sp-search-input" placeholder="Ketik lagu (atau chat: req judul)" />
-    <button id="sp-search-btn">Cari</button>
-    <input type="range" id="sp-vol" min="0" max="1" step="0.05" value="0.6" title="Volume" />
+    <input type="text" id="sp-search-input" placeholder="Ketik lagu (Full 1 Lagu Penuh)" />
+    <button id="sp-search-btn">Putar</button>
+    <input type="range" id="sp-vol" min="0" max="100" step="5" value="65" title="Volume Musik" />
   </div>
 </div>
 
 <script>
 (function() {
-  const defaultQueries = [
-    { title: 'Sesi Potret', artist: 'Raim Laode', q: 'Raim Laode Sesi Potret' },
-    { title: 'Training Season', artist: 'Dua Lipa', q: 'Dua Lipa Training Season' },
-    { title: 'My Heart', artist: 'Irwansyah & Acha Septriasa', q: 'Irwansyah Acha Septriasa My Heart' },
-    { title: 'Kaulah Kamuku', artist: 'Fatin & The Overtunes', q: 'Fatin Kaulah Kamuku' },
-    { title: 'Jikalau Kau Cinta', artist: 'Judika', q: 'Judika Jikalau Kau Cinta' },
-    { title: 'Komang', artist: 'Raim Laode', q: 'Raim Laode Komang' },
-    { title: 'Penjaga Hati', artist: 'Nadhif Basalamah', q: 'Nadhif Basalamah Penjaga Hati' },
-    { title: 'Gala Bunga Matahari', artist: 'Sal Priadi', q: 'Sal Priadi Gala Bunga Matahari' },
-    { title: 'Kupu-Kupu', artist: 'Tiara Andini', q: 'Tiara Andini Kupu Kupu' },
-    { title: 'Tak Segampang Itu', artist: 'Anggi Marito', q: 'Anggi Marito Tak Segampang Itu' },
-    { title: 'Sial', artist: 'Mahalini', q: 'Mahalini Sial' },
-    { title: 'Untungnya Hidup Harus Tetap Berjalan', artist: 'Bernadya', q: 'Bernadya Untungnya' }
+  if (window.__PRO_ARENA_LOADED) return;
+  window.__PRO_ARENA_LOADED = true;
+
+  // 1. SINKRONISASI ANTAR TAB (Mencegah suara tabrakan jika dibuka di Chrome + Live Studio sekaligus)
+  const tabId = Math.random().toString(36).slice(2);
+  const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('ptrgenz_bgm_lock') : null;
+
+  function claimAudioMaster() {
+    if (syncChannel) syncChannel.postMessage({ type: 'CLAIM_MASTER', id: tabId });
+    try { localStorage.setItem('ptrgenz_bgm_master', tabId); } catch (e) {}
+  }
+
+  // 2. DAFTAR LAGU HITS FULL DURASI
+  const defaultTracks = [
+    { title: 'Sesi Potret (Teh Hijau)', artist: 'Raim Laode', q: 'Raim Laode Sesi Potret lirik' },
+    { title: 'Training Season', artist: 'Dua Lipa', q: 'Dua Lipa Training Season lirik terjemahan' },
+    { title: 'My Heart', artist: 'Irwansyah & Acha Septriasa', q: 'Irwansyah Acha Septriasa My Heart lirik' },
+    { title: 'Kaulah Kamuku', artist: 'Fatin & The Overtunes', q: 'Fatin Kaulah Kamuku lirik' },
+    { title: 'Jikalau Kau Cinta', artist: 'Judika', q: 'Judika Jikalau Kau Cinta lirik' },
+    { title: 'Komang', artist: 'Raim Laode', q: 'Raim Laode Komang lirik' },
+    { title: 'Penjaga Hati', artist: 'Nadhif Basalamah', q: 'Nadhif Basalamah Penjaga Hati lirik' },
+    { title: 'Gala Bunga Matahari', artist: 'Sal Priadi', q: 'Sal Priadi Gala Bunga Matahari lirik' },
+    { title: 'Kupu-Kupu', artist: 'Tiara Andini', q: 'Tiara Andini Kupu Kupu lirik' },
+    { title: 'Tak Segampang Itu', artist: 'Anggi Marito', q: 'Anggi Marito Tak Segampang Itu lirik' },
+    { title: 'Sial', artist: 'Mahalini', q: 'Mahalini Sial lirik' },
+    { title: 'Untungnya Hidup Harus Tetap Berjalan', artist: 'Bernadya', q: 'Bernadya Untungnya Hidup Harus Tetap Berjalan lirik' }
   ];
 
-  let tracks = [...defaultQueries];
+  let tracks = [...defaultTracks];
   let idx = 0;
-  let userVol = 0.6;
-  const bgm = new Audio();
-  bgm.crossOrigin = 'anonymous';
-  bgm.preload = 'auto';
-  bgm.volume = userVol;
+  let userVol = 65;
+  let isPlaying = false;
+  let loadToken = 0; // Pengunci agar tidak pernah ada 2 proses load lagu bersamaan
+  let ytPlayer = null;
+  let ytReady = false;
+  let candidateIds = [];
+  let candidateIdx = 0;
+  let localAudio = new Audio();
+  let usingLocalMp3 = false;
 
-  const disc = document.getElementById('sp-disc');
   const badgeEl = document.getElementById('sp-badge');
+  const timeEl = document.getElementById('sp-time');
   const titleEl = document.getElementById('sp-title');
   const artistEl = document.getElementById('sp-artist');
+  const progFill = document.getElementById('sp-progress-fill');
   const toggleBtn = document.getElementById('sp-toggle');
   const prevBtn = document.getElementById('sp-prev');
   const nextBtn = document.getElementById('sp-next');
   const volInput = document.getElementById('sp-vol');
   const searchInput = document.getElementById('sp-search-input');
   const searchBtn = document.getElementById('sp-search-btn');
+  const feedList = document.getElementById('pro-feed-list');
+  const toastEl = document.getElementById('pro-toast');
 
-  function updateUI(playing) {
-    if (playing) {
-      disc.classList.add('playing');
-      toggleBtn.innerHTML = '&#10074;&#10074;';
-      badgeEl.textContent = 'SEDANG MEMUTAR';
-    } else {
-      disc.classList.remove('playing');
-      toggleBtn.innerHTML = '&#9654;';
-      badgeEl.textContent = 'KLIK PLAY UNTUK MUSIK';
+  function fmtTime(sec) {
+    if (!sec || isNaN(sec) || sec < 0) return '00:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+  }
+
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window.__toastTimer);
+    window.__toastTimer = setTimeout(() => toastEl.classList.remove('show'), 3500);
+  }
+
+  function addFeedItem(text, type) {
+    if (!feedList) return;
+    const div = document.createElement('div');
+    div.className = 'pro-feed-item' + (type ? ' ' + type : '');
+    div.textContent = text;
+    feedList.prepend(div);
+    while (feedList.children.length > 5) {
+      feedList.removeChild(feedList.lastChild);
     }
   }
 
-  function tryPlay() {
-    bgm.play().then(() => {
-      updateUI(true);
-    }).catch(() => {
-      updateUI(false);
-    });
+  function stopAllMusic() {
+    try {
+      localAudio.pause();
+      localAudio.currentTime = 0;
+    } catch (e) {}
+    try {
+      if (ytReady && ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+    } catch (e) {}
   }
 
-  function loadAndPlay(index, autoPlay) {
+  if (syncChannel) {
+    syncChannel.onmessage = (ev) => {
+      if (ev.data && ev.data.type === 'CLAIM_MASTER' && ev.data.id !== tabId) {
+        stopAllMusic();
+        isPlaying = false;
+        toggleBtn.innerHTML = '&#9654;';
+        badgeEl.textContent = 'AKTIF DI TAB LAIN';
+      }
+    };
+  }
+
+  function setPlayStateUI(playing) {
+    isPlaying = playing;
+    toggleBtn.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+    badgeEl.textContent = playing ? 'FULL LAGU AKTIF' : 'PAUSED / KLIK PLAY';
+  }
+
+  // Muat YouTube Player (Tampil langsung di dalam bulatan piringan #sp-disc-wrap agar tidak diblokir Chrome)
+  const ytScript = document.createElement('script');
+  ytScript.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(ytScript);
+
+  window.onYouTubeIframeAPIReady = function() {
+    ytPlayer = new YT.Player('yt-bgm-frame', {
+      height: '48',
+      width: '48',
+      playerVars: {
+        autoplay: 1,
+        controls: 0,
+        disablekb: 1,
+        fs: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        rel: 0
+      },
+      events: {
+        onReady: () => {
+          ytReady = true;
+          ytPlayer.setVolume(userVol);
+          loadTrack(0, true);
+        },
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.PLAYING) {
+            claimAudioMaster();
+            setPlayStateUI(true);
+          } else if (e.data === YT.PlayerState.PAUSED) {
+            setPlayStateUI(false);
+          } else if (e.data === YT.PlayerState.ENDED) {
+            // HANYA PINDAH LAGU JIKA 1 LAGU PENUH SUDAH BENAR-BENAR SELESAI
+            const dur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
+            const cur = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
+            if (dur > 0 && cur >= dur - 3) {
+              loadTrack(idx + 1, true);
+            }
+          }
+        },
+        onError: () => {
+          // Jika video ke-1 diblokir embed oleh pemiliknya, coba video lirik ke-2, ke-3, dst.
+          candidateIdx++;
+          if (candidateIdx < candidateIds.length && ytReady) {
+            ytPlayer.loadVideoById(candidateIds[candidateIdx]);
+          } else {
+            // Jika semua gagal, baru pindah ke lagu berikutnya setelah 2 detik
+            setTimeout(() => loadTrack(idx + 1, true), 2000);
+          }
+        }
+      }
+    });
+  };
+
+  // Update Progress Bar & Waktu Lagu setiap 500ms
+  setInterval(() => {
+    if (usingLocalMp3 && !localAudio.paused && localAudio.duration) {
+      const cur = localAudio.currentTime;
+      const dur = localAudio.duration;
+      timeEl.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
+      progFill.style.width = Math.min((cur / dur) * 100, 100) + '%';
+    } else if (!usingLocalMp3 && ytReady && ytPlayer && isPlaying && ytPlayer.getDuration) {
+      const dur = ytPlayer.getDuration();
+      const cur = ytPlayer.getCurrentTime();
+      if (dur > 0) {
+        timeEl.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
+        progFill.style.width = Math.min((cur / dur) * 100, 100) + '%';
+      }
+    }
+  }, 500);
+
+  function loadTrack(newIdx, autoPlay) {
     if (!tracks.length) return;
-    idx = (index + tracks.length) % tracks.length;
+    loadToken++;
+    const currentToken = loadToken;
+
+    stopAllMusic();
+    progFill.style.width = '0%';
+    timeEl.textContent = '00:00 / --:--';
+
+    idx = (newIdx + tracks.length) % tracks.length;
     const item = tracks[idx];
     titleEl.textContent = item.title;
     artistEl.textContent = item.artist;
+    badgeEl.textContent = 'MEMUAT LAGU FULL...';
 
+    // Jika file .mp3 lokal dari folder C:\projects\tiktok-cliff-game\mp3
     if (item.url) {
-      bgm.src = item.url;
-      if (item.cover) disc.style.backgroundImage = 'url(' + item.cover + ')';
-      if (autoPlay) tryPlay();
+      usingLocalMp3 = true;
+      localAudio.src = item.url;
+      localAudio.volume = userVol / 100;
+      if (autoPlay) {
+        claimAudioMaster();
+        localAudio.play().then(() => setPlayStateUI(true)).catch(() => setPlayStateUI(false));
+      }
       return;
     }
 
-    // Langsung ambil stream audio HTTPS resmi dari iTunes Indonesia (tanpa blokir CORS/Mixed Content)
-    const apiUrl = 'https://itunes.apple.com/search?term=' + encodeURIComponent(item.q || item.title) + '&country=ID&media=music&entity=song&limit=3';
-    fetch(apiUrl)
+    usingLocalMp3 = false;
+    const searchQ = item.q || (item.title + ' ' + item.artist);
+    fetch('http://localhost:3000/yt-search?q=' + encodeURIComponent(searchQ))
       .then(r => r.json())
       .then(data => {
-        if (data && data.results && data.results.length > 0) {
-          const hit = data.results[0];
-          item.url = hit.previewUrl;
-          item.title = hit.trackName || item.title;
-          item.artist = hit.artistName || item.artist;
-          item.cover = hit.artworkUrl100 || '';
-
-          titleEl.textContent = item.title;
-          artistEl.textContent = item.artist;
-          if (item.cover) disc.style.backgroundImage = 'url(' + item.cover + ')';
-
-          bgm.src = item.url;
-          if (autoPlay) tryPlay();
+        if (currentToken !== loadToken) return; // Batalkan jika sudah ganti lagu lain
+        if (data && Array.isArray(data.videoIds) && data.videoIds.length > 0 && ytReady) {
+          candidateIds = data.videoIds;
+          candidateIdx = 0;
+          claimAudioMaster();
+          ytPlayer.loadVideoById(candidateIds[0]);
+          ytPlayer.setVolume(userVol);
+          if (!autoPlay) ytPlayer.pauseVideo();
         } else {
-          setTimeout(() => loadAndPlay(idx + 1, autoPlay), 1000);
+          badgeEl.textContent = 'LAGU TIDAK DITEMUKAN';
         }
       })
       .catch(() => {
-        setTimeout(() => loadAndPlay(idx + 1, autoPlay), 1500);
+        if (currentToken !== loadToken) return;
+        badgeEl.textContent = 'CEK SERVER.JS';
       });
   }
 
-  function requestSong(queryText, requesterName) {
+  localAudio.addEventListener('ended', () => {
+    if (usingLocalMp3) loadTrack(idx + 1, true);
+  });
+
+  function playCustomRequest(queryText, requesterName) {
     if (!queryText) return;
-    const customTrack = {
+    const newItem = {
       title: queryText,
-      artist: requesterName ? ('Request @' + requesterName) : 'Pencarian Musik',
-      q: queryText
+      artist: requesterName ? ('Request @' + requesterName) : 'Pencarian Lagu Full',
+      q: queryText + ' lirik'
     };
-    tracks.splice(idx + 1, 0, customTrack);
-    loadAndPlay(idx + 1, true);
+    tracks.splice(idx + 1, 0, newItem);
+    addFeedItem('?? ' + (requesterName || 'Host') + ' memutar: ' + queryText, 'req');
+    showToast('?? Memutar Lagu: ' + queryText);
+    loadTrack(idx + 1, true);
   }
 
   toggleBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (bgm.paused) tryPlay();
-    else { bgm.pause(); updateUI(false); }
+    claimAudioMaster();
+    if (usingLocalMp3) {
+      if (localAudio.paused) localAudio.play().then(() => setPlayStateUI(true)).catch(() => {});
+      else { localAudio.pause(); setPlayStateUI(false); }
+    } else if (ytReady && ytPlayer) {
+      const state = ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -1;
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+        setPlayStateUI(false);
+      } else {
+        ytPlayer.playVideo();
+        setPlayStateUI(true);
+      }
+    }
   });
 
   nextBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    loadAndPlay(idx + 1, true);
+    loadTrack(idx + 1, true);
   });
 
   prevBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    loadAndPlay(idx - 1, true);
+    loadTrack(idx - 1, true);
   });
 
   volInput.addEventListener('input', (e) => {
-    userVol = parseFloat(e.target.value);
-    bgm.volume = userVol;
+    userVol = parseInt(e.target.value, 10);
+    localAudio.volume = userVol / 100;
+    if (ytReady && ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(userVol);
   });
 
   searchBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     const val = searchInput.value.trim();
     if (val) {
-      requestSong(val, '');
+      playCustomRequest(val, '');
       searchInput.value = '';
     }
   });
@@ -1228,46 +1663,52 @@
     if (e.key === 'Enter') {
       const val = searchInput.value.trim();
       if (val) {
-        requestSong(val, '');
+        playCustomRequest(val, '');
         searchInput.value = '';
       }
     }
   });
 
-  bgm.addEventListener('ended', () => loadAndPlay(idx + 1, true));
-  bgm.addEventListener('error', () => setTimeout(() => loadAndPlay(idx + 1, true), 1500));
-
-  // Cek lagu lokal di folder mp3 jika ada
+  // Cek jika ada file .mp3 di C:\projects\tiktok-cliff-game\mp3
   fetch('http://localhost:3000/playlist')
     .then(r => r.json())
     .then(localFiles => {
       if (Array.isArray(localFiles) && localFiles.length > 0) {
-        tracks = [...localFiles, ...defaultQueries];
+        tracks = [...localFiles, ...defaultTracks];
       }
-      loadAndPlay(0, true);
     })
-    .catch(() => loadAndPlay(0, true));
+    .catch(() => {});
 
-  // Klik di mana saja pada layar langsung menyalakan musik jika sempat tertahan autoplay
-  document.addEventListener('pointerdown', () => {
-    if (bgm.paused && bgm.src) tryPlay();
-  });
-
+  // Hubungkan Socket.IO untuk Live Feed & Request Lagu Penonton
   try {
     if (window.io) {
-      const s = window.io('http://localhost:3000');
-      s.on('song-request', (d) => {
-        if (d && d.query) requestSong(d.query, d.user || 'Penonton');
+      const liveSocket = window.io('http://localhost:3000');
+      liveSocket.on('song-request', (d) => {
+        if (d && d.query) playCustomRequest(d.query, d.user || 'Penonton');
+      });
+      liveSocket.on('live-event', (ev) => {
+        if (!ev) return;
+        if (ev.kind === 'gift') {
+          addFeedItem('?? @' + ev.nickname + ' mengirim ' + ev.giftName + '!', 'gift');
+          showToast('?? GIFT MASUK: @' + ev.nickname + ' kirim ' + ev.giftName + '!');
+        } else if (ev.kind === 'chat') {
+          addFeedItem('?? @' + ev.nickname + ': ' + ev.comment, '');
+        } else if (ev.kind === 'boost') {
+          addFeedItem('?? @' + ev.nickname + ' tap-tap layar! (+Boost)', '');
+        }
       });
     }
   } catch (e) {}
 
+  // Fungsi Auto-Ducking (Kecilkan volume musik sedikit saat suara TTS bicara)
   function duckBgm(duck) {
-    bgm.volume = duck ? Math.min(userVol * 0.2, 0.1) : userVol;
+    const targetVol = duck ? Math.min(Math.round(userVol * 0.25), 15) : userVol;
+    localAudio.volume = targetVol / 100;
+    if (ytReady && ytPlayer && ytPlayer.setVolume) ytPlayer.setVolume(targetVol);
   }
 
-  // SUARA BAHASA INDONESIA + AUTO DUCKING
-  let currentAudio = null;
+  // 3. SUARA BAHASA INDONESIA + AUTO DUCKING
+  let currentTtsAudio = null;
   const origSpeak = window.speechSynthesis ? window.speechSynthesis.speak.bind(window.speechSynthesis) : null;
   const origCancel = window.speechSynthesis ? window.speechSynthesis.cancel.bind(window.speechSynthesis) : null;
 
@@ -1289,39 +1730,29 @@
       .replace(/\bspawned\b/gi, 'memunculkan');
   }
 
-  function fallbackBrowserSpeak(utterance) {
-    if (!origSpeak || !utterance) return;
-    utterance.lang = 'id-ID';
-    const voices = window.speechSynthesis.getVoices() || [];
-    const idVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('id'));
-    if (idVoice) utterance.voice = idVoice;
-    duckBgm(true);
-    utterance.onend = () => duckBgm(false);
-    utterance.onerror = () => duckBgm(false);
-    origSpeak(utterance);
-  }
-
   if (window.speechSynthesis) {
     window.speechSynthesis.cancel = function() {
-      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      if (currentTtsAudio) { currentTtsAudio.pause(); currentTtsAudio = null; }
       duckBgm(false);
       if (origCancel) origCancel();
     };
     window.speechSynthesis.speak = function(utterance) {
       if (!utterance || !utterance.text) return;
       const cleanText = toIndonesianText(utterance.text);
-      utterance.text = cleanText;
-      utterance.lang = 'id-ID';
-      if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+      if (currentTtsAudio) { currentTtsAudio.pause(); currentTtsAudio = null; }
       const audio = new Audio('http://localhost:3000/tts?text=' + encodeURIComponent(cleanText));
       audio.playbackRate = 1.15;
-      currentAudio = audio;
+      currentTtsAudio = audio;
       duckBgm(true);
       audio.onended = () => duckBgm(false);
       audio.onerror = () => duckBgm(false);
       audio.play().catch(() => {
         duckBgm(false);
-        fallbackBrowserSpeak(utterance);
+        if (origSpeak) {
+          utterance.text = cleanText;
+          utterance.lang = 'id-ID';
+          origSpeak(utterance);
+        }
       });
     };
   }
