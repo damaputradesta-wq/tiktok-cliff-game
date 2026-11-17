@@ -85,16 +85,76 @@ app.get('/tts', (req, res) => {
   }).on('error', () => res.status(500).end());
 });
 
+// ============================================================================
+// MASTER STATE SERVER (SINKRONISASI PENUH CHROME <-> TIKTOK LIVE STUDIO)
+// ============================================================================
+const GOAL_DIST = 30000;
+const masterState = {
+  dist: 0,
+  targetDist: 0,
+  vel: 0,
+  autoGas: false,
+  finishCount: 0,
+  deathCount: 0,
+  songIndex: 0,
+  musicPos: { leftPct: null, topPct: null },
+  musicHidden: false,
+  menuHidden: false,
+  musicPlaying: true,
+  musicVol: 60
+};
+
+function applyActionToServer(ev) {
+  const dir = ev.dir || 'down';
+  const meters = Number(ev.meters) || 60;
+  if (dir === 'up') {
+    masterState.targetDist += meters;
+  } else {
+    masterState.targetDist -= meters;
+  }
+  io.emit('live-event', ev);
+  io.emit('state-sync', masterState);
+}
+
+setInterval(() => {
+  if (masterState.autoGas) {
+    masterState.targetDist += 1.6;
+  }
+  const diff = masterState.targetDist - masterState.dist;
+  if (Math.abs(diff) > 0.2) {
+    const step = diff * 0.14;
+    masterState.dist += step;
+    masterState.vel = step * 8;
+  } else {
+    masterState.vel *= 0.8;
+    if (Math.abs(masterState.vel) < 0.05) masterState.vel = 0;
+  }
+
+  if (masterState.dist >= GOAL_DIST) {
+    masterState.finishCount++;
+    masterState.dist = 0;
+    masterState.targetDist = 0;
+    masterState.vel = 0;
+    io.emit('milestone', { kind: 'finish', finishCount: masterState.finishCount });
+  } else if (masterState.dist <= -1500) {
+    masterState.deathCount++;
+    masterState.dist = 0;
+    masterState.targetDist = 0;
+    masterState.vel = 0;
+    io.emit('milestone', { kind: 'death', deathCount: masterState.deathCount });
+  }
+
+  io.emit('state-sync', masterState);
+}, 80);
+
 const TARGET_USER = 'ptrgenz';
 let activeConnection = null;
 let isConnecting = false;
 let retryTimer = null;
 
-// Mapping Lengkap Item Gift TikTok (Dari 1 Koin Mawar s/d Paus & Singa)
 function mapGiftToAction(giftName, coins) {
   const name = (giftName || '').toLowerCase();
 
-  // --- KATEGORI BANTU NAIK / MAJU ---
   if (name.includes('roket') || name.includes('rocket') || name.includes('pesawat') || name.includes('plane') || name.includes('jet') || name.includes('ferrari') || name.includes('lamborghini')) {
     return { dir: 'up', type: 'jet', label: 'Turbo Jet MBG', meters: 1800, power: 550 };
   }
@@ -102,45 +162,34 @@ function mapGiftToAction(giftName, coins) {
     return { dir: 'up', type: 'kopdes', label: 'Truk Kopdes MBG', meters: 220, power: 180 };
   }
 
-  // --- KATEGORI GANGGUAN / TURUN (MURAH -> SULTAN) ---
-  // 1. Singa / Universe (Sultan Tertinggi)
   if (name.includes('singa') || name.includes('lion') || name.includes('universe') || name.includes('phoenix') || name.includes('naga') || name.includes('dragon')) {
     return { dir: 'down', type: 'singa', label: 'Raja Singa & Meteor Kiamat', meters: 15000, power: 1800 };
   }
-  // 2. Paus / Galaksi / Kapal Pesiar
   if (name.includes('paus') || name.includes('whale') || name.includes('galaksi') || name.includes('galaxy') || name.includes('kapal') || name.includes('yacht')) {
     return { dir: 'down', type: 'paus', label: 'Tsunami Paus Raksasa', meters: 4500, power: 1100 };
   }
-  // 3. Kereta / Corgi / Mobil
   if (name.includes('kereta') || name.includes('train') || name.includes('corgi') || name.includes('bebek') || name.includes('uang') || name.includes('money')) {
     return { dir: 'down', type: 'kereta', label: 'Kereta Cepat Whoosh', meters: 2000, power: 780 };
   }
-  // 4. Mahkota / Topi / Kacamata
   if (name.includes('mahkota') || name.includes('crown') || name.includes('topi') || name.includes('hat') || name.includes('kursi')) {
     return { dir: 'down', type: 'basuri', label: 'Bus Telolet Basuri', meters: 1100, power: 560 };
   }
-  // 5. Donat / Buket Bunga
   if (name.includes('donat') || name.includes('doughnut') || name.includes('donut') || name.includes('buket') || name.includes('bouquet')) {
     return { dir: 'down', type: 'ufo', label: 'UFO Alien Sedot MBG', meters: 650, power: 440 };
   }
-  // 6. Parfum / Beruang / Miska
   if (name.includes('parfum') || name.includes('perfume') || name.includes('beruang') || name.includes('bear') || name.includes('miska')) {
     return { dir: 'down', type: 'kameha', label: 'Laser Kamehameha', meters: 420, power: 340 };
   }
-  // 7. Kopi / Rosa / Bom
   if (name.includes('kopi') || name.includes('coffee') || name.includes('rosa') || name.includes('bom') || name.includes('bomb') || name.includes('energi')) {
     return { dir: 'down', type: 'soundhoreg', label: 'Truk Sound Horeg', meters: 250, power: 240 };
   }
-  // 8. Es Krim / Jari Hati / Hati
   if (name.includes('es ') || name.includes('es krim') || name.includes('ice') || name.includes('jari') || name.includes('finger') || name.includes('heart') || name.includes('hati')) {
     return { dir: 'down', type: 'kaki', label: 'Injakan Kaki Raksasa', meters: 120, power: 145 };
   }
-  // 9. Mawar / TikTok / GG (1 Koin)
   if (name.includes('mawar') || name.includes('rose') || name.includes('tiktok') || name.includes('gg')) {
     return { dir: 'down', type: 'angkot', label: 'Angkot Biru Ngetem', meters: 60, power: 95 };
   }
 
-  // --- FALLBACK OTOMATIS BERDASARKAN JUMLAH KOIN JIKA NAMA GIFT LAIN ---
   if (coins >= 5000) return { dir: 'down', type: 'singa', label: 'Raja Singa & Meteor Kiamat', meters: 15000, power: 1800 };
   if (coins >= 1000) return { dir: 'down', type: 'paus', label: 'Tsunami Paus Raksasa', meters: 4500, power: 1100 };
   if (coins >= 299)  return { dir: 'down', type: 'kereta', label: 'Kereta Cepat Whoosh', meters: 2000, power: 780 };
@@ -182,13 +231,12 @@ function connectTikTokRoom() {
     retryTimer = setTimeout(() => { retryTimer = null; connectTikTokRoom(); }, retryMs);
   });
 
-  // TAP-TAP LAYAR (LIKE) REAL-TIME
   tiktok.on('like', (data) => {
     const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'penonton';
     const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
     const likeCount = Math.min(data.likeCount || 1, 15);
-    console.log('[TAP-TAP] @' + uniqueId + ' (' + likeCount + 'x like)');
-    io.emit('live-event', {
+    console.log('[TAP-TAP] @' + uniqueId + ' (+' + (likeCount * 12) + 'm)');
+    applyActionToServer({
       kind: 'boost',
       dir: 'up',
       type: 'tap',
@@ -200,7 +248,6 @@ function connectTikTokRoom() {
     });
   });
 
-  // KOMENTAR CHAT REAL-TIME
   tiktok.on('chat', (data) => {
     const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'penonton';
     const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
@@ -213,7 +260,7 @@ function connectTikTokRoom() {
       io.emit('song-request', { user: nickname, query: songQuery });
     }
 
-    io.emit('live-event', {
+    applyActionToServer({
       kind: 'chat',
       dir: 'up',
       type: 'chat',
@@ -226,7 +273,6 @@ function connectTikTokRoom() {
     });
   });
 
-  // GIFT TIKTOK REAL-TIME (MURAH S/D SULTAN)
   tiktok.on('gift', (data) => {
     const giftType = data.giftType ?? (data.giftDetails && data.giftDetails.giftType) ?? 0;
     if (giftType === 1 && !data.repeatEnd) return;
@@ -239,7 +285,7 @@ function connectTikTokRoom() {
     const act = mapGiftToAction(gName, coins);
 
     console.log('[GIFT REALTIME] @' + uniqueId + ' -> ' + gName + ' x' + count + ' (' + coins + 'c) => ' + act.label);
-    io.emit('live-event', {
+    applyActionToServer({
       kind: 'gift',
       dir: act.dir,
       type: act.type,
@@ -259,18 +305,75 @@ function connectTikTokRoom() {
 }
 
 io.on('connection', (socket) => {
+  socket.emit('state-sync', masterState);
+  socket.emit('autogas-sync', masterState.autoGas);
+  socket.emit('ui-sync-state', {
+    musicPos: masterState.musicPos,
+    musicHidden: masterState.musicHidden,
+    menuHidden: masterState.menuHidden,
+    musicPlaying: masterState.musicPlaying,
+    musicVol: masterState.musicVol
+  });
+
   if (activeConnection) socket.emit('status', { state: 'connected', text: 'LIVE: @' + TARGET_USER });
   else connectTikTokRoom();
+
   socket.on('join-live', () => {
+    socket.emit('state-sync', masterState);
     if (activeConnection) socket.emit('status', { state: 'connected', text: 'LIVE: @' + TARGET_USER });
     else connectTikTokRoom();
+  });
+
+  socket.on('set-autogas', (val) => {
+    masterState.autoGas = Boolean(val);
+    io.emit('autogas-sync', masterState.autoGas);
+    io.emit('state-sync', masterState);
+  });
+
+  // SINKRONISASI GESER KOTAK MUSIK SECARA REAL-TIME ANTAR LAYAR
+  socket.on('ui-drag-music', (pos) => {
+    if (pos && typeof pos.leftPct === 'number' && typeof pos.topPct === 'number') {
+      masterState.musicPos = pos;
+      socket.broadcast.emit('ui-drag-music', pos);
+    }
+  });
+
+  // SINKRONISASI TOMBOL MENU, MUSIK HIDE/SHOW, PLAY/PAUSE & VOLUME
+  socket.on('ui-toggle', (data) => {
+    if (!data) return;
+    if (typeof data.musicHidden === 'boolean') masterState.musicHidden = data.musicHidden;
+    if (typeof data.menuHidden === 'boolean') masterState.menuHidden = data.menuHidden;
+    if (typeof data.musicPlaying === 'boolean') masterState.musicPlaying = data.musicPlaying;
+    if (typeof data.musicVol === 'number') masterState.musicVol = data.musicVol;
+    socket.broadcast.emit('ui-sync-state', {
+      musicPos: masterState.musicPos,
+      musicHidden: masterState.musicHidden,
+      menuHidden: masterState.menuHidden,
+      musicPlaying: masterState.musicPlaying,
+      musicVol: masterState.musicVol
+    });
+  });
+
+  socket.on('manual-action', (ev) => {
+    if (ev) applyActionToServer(ev);
+  });
+
+  socket.on('change-song', (newIdx) => {
+    masterState.songIndex = Number(newIdx) || 0;
+    socket.broadcast.emit('sync-song-index', masterState.songIndex);
+  });
+
+  socket.on('custom-song', (payload) => {
+    if (payload && payload.query) {
+      io.emit('song-request', payload);
+    }
   });
 });
 
 server.listen(3000, () => {
   console.log('====================================================');
-  console.log('SERVER REAL-TIME PENONTON + GIFT LENGKAP AKTIF (@ptrgenz)');
-  console.log('URL LIVE STUDIO: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&realtime=1');
+  console.log('SERVER FULL SINKRONISASI + SUARA TAP/KOMEN/GIFT AKTIF!');
+  console.log('URL LIVE STUDIO: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&fullsync=1');
   console.log('====================================================');
   connectTikTokRoom();
 });
