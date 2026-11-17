@@ -90,39 +90,67 @@ let activeConnection = null;
 let isConnecting = false;
 let retryTimer = null;
 
+// Mapping Lengkap Item Gift TikTok (Dari 1 Koin Mawar s/d Paus & Singa)
 function mapGiftToAction(giftName, coins) {
   const name = (giftName || '').toLowerCase();
-  if (name.includes('persahabatan') || name.includes('kalung') || name.includes('hati') || name.includes('heart') || name.includes('cinta')) {
-    return { dir: 'up', type: 'kopdes', label: 'Truk Kopdes', power: 180 };
+
+  // --- KATEGORI BANTU NAIK / MAJU ---
+  if (name.includes('roket') || name.includes('rocket') || name.includes('pesawat') || name.includes('plane') || name.includes('jet') || name.includes('ferrari') || name.includes('lamborghini')) {
+    return { dir: 'up', type: 'jet', label: 'Turbo Jet MBG', meters: 1800, power: 550 };
   }
-  if (name.includes('roket') || name.includes('pesawat') || name.includes('optimus')) {
-    return { dir: 'up', type: 'jet', label: 'Turbo Jet MBG', power: 450 };
-  }
-  if (name.includes('mawar') || name.includes('rose')) {
-    return { dir: 'down', type: 'angkot', label: 'Angkot Biru', power: 95 };
-  }
-  if (name.includes('es ') || name.includes('ice') || name.includes('panci') || name.includes('kaki')) {
-    return { dir: 'down', type: 'kaki', label: 'Injakan Kaki Raksasa', power: 140 };
-  }
-  if (name.includes('rosa') || name.includes('bom') || name.includes('kopi') || name.includes('tiktok')) {
-    return { dir: 'down', type: 'soundhoreg', label: 'Truk Sound Horeg', power: 260 };
-  }
-  if (name.includes('beruang') || name.includes('miska') || name.includes('parfum') || name.includes('topi')) {
-    return { dir: 'down', type: 'kameha', label: 'Laser Kamehameha', power: 380 };
-  }
-  if (name.includes('donat') || name.includes('doughnut') || name.includes('ufo')) {
-    return { dir: 'down', type: 'ufo', label: 'UFO Sedot MBG', power: 520 };
-  }
-  if (name.includes('singa') || name.includes('lion') || name.includes('paus') || name.includes('universe') || coins >= 100) {
-    return { dir: 'down', type: 'meteor', label: 'Meteor Api Raksasa', power: 900 };
+  if (name.includes('kalung') || name.includes('persahabatan') || name.includes('friendship') || name.includes('nasi') || name.includes('ketupat') || name.includes('susu')) {
+    return { dir: 'up', type: 'kopdes', label: 'Truk Kopdes MBG', meters: 220, power: 180 };
   }
 
-  if (coins >= 50) return { dir: 'down', type: 'meteor', label: 'Meteor Api Raksasa', power: 750 };
-  if (coins >= 25) return { dir: 'down', type: 'ufo', label: 'UFO Alien', power: 480 };
-  if (coins >= 15) return { dir: 'down', type: 'kameha', label: 'Laser Kamehameha', power: 350 };
-  if (coins >= 8)  return { dir: 'down', type: 'soundhoreg', label: 'Truk Sound Horeg', power: 240 };
-  if (coins >= 3)  return { dir: 'up', type: 'kopdes', label: 'Truk Kopdes', power: 170 };
-  return { dir: 'down', type: 'angkot', label: 'Angkot Biru', power: 90 };
+  // --- KATEGORI GANGGUAN / TURUN (MURAH -> SULTAN) ---
+  // 1. Singa / Universe (Sultan Tertinggi)
+  if (name.includes('singa') || name.includes('lion') || name.includes('universe') || name.includes('phoenix') || name.includes('naga') || name.includes('dragon')) {
+    return { dir: 'down', type: 'singa', label: 'Raja Singa & Meteor Kiamat', meters: 15000, power: 1800 };
+  }
+  // 2. Paus / Galaksi / Kapal Pesiar
+  if (name.includes('paus') || name.includes('whale') || name.includes('galaksi') || name.includes('galaxy') || name.includes('kapal') || name.includes('yacht')) {
+    return { dir: 'down', type: 'paus', label: 'Tsunami Paus Raksasa', meters: 4500, power: 1100 };
+  }
+  // 3. Kereta / Corgi / Mobil
+  if (name.includes('kereta') || name.includes('train') || name.includes('corgi') || name.includes('bebek') || name.includes('uang') || name.includes('money')) {
+    return { dir: 'down', type: 'kereta', label: 'Kereta Cepat Whoosh', meters: 2000, power: 780 };
+  }
+  // 4. Mahkota / Topi / Kacamata
+  if (name.includes('mahkota') || name.includes('crown') || name.includes('topi') || name.includes('hat') || name.includes('kursi')) {
+    return { dir: 'down', type: 'basuri', label: 'Bus Telolet Basuri', meters: 1100, power: 560 };
+  }
+  // 5. Donat / Buket Bunga
+  if (name.includes('donat') || name.includes('doughnut') || name.includes('donut') || name.includes('buket') || name.includes('bouquet')) {
+    return { dir: 'down', type: 'ufo', label: 'UFO Alien Sedot MBG', meters: 650, power: 440 };
+  }
+  // 6. Parfum / Beruang / Miska
+  if (name.includes('parfum') || name.includes('perfume') || name.includes('beruang') || name.includes('bear') || name.includes('miska')) {
+    return { dir: 'down', type: 'kameha', label: 'Laser Kamehameha', meters: 420, power: 340 };
+  }
+  // 7. Kopi / Rosa / Bom
+  if (name.includes('kopi') || name.includes('coffee') || name.includes('rosa') || name.includes('bom') || name.includes('bomb') || name.includes('energi')) {
+    return { dir: 'down', type: 'soundhoreg', label: 'Truk Sound Horeg', meters: 250, power: 240 };
+  }
+  // 8. Es Krim / Jari Hati / Hati
+  if (name.includes('es ') || name.includes('es krim') || name.includes('ice') || name.includes('jari') || name.includes('finger') || name.includes('heart') || name.includes('hati')) {
+    return { dir: 'down', type: 'kaki', label: 'Injakan Kaki Raksasa', meters: 120, power: 145 };
+  }
+  // 9. Mawar / TikTok / GG (1 Koin)
+  if (name.includes('mawar') || name.includes('rose') || name.includes('tiktok') || name.includes('gg')) {
+    return { dir: 'down', type: 'angkot', label: 'Angkot Biru Ngetem', meters: 60, power: 95 };
+  }
+
+  // --- FALLBACK OTOMATIS BERDASARKAN JUMLAH KOIN JIKA NAMA GIFT LAIN ---
+  if (coins >= 5000) return { dir: 'down', type: 'singa', label: 'Raja Singa & Meteor Kiamat', meters: 15000, power: 1800 };
+  if (coins >= 1000) return { dir: 'down', type: 'paus', label: 'Tsunami Paus Raksasa', meters: 4500, power: 1100 };
+  if (coins >= 299)  return { dir: 'down', type: 'kereta', label: 'Kereta Cepat Whoosh', meters: 2000, power: 780 };
+  if (coins >= 99)   return { dir: 'down', type: 'basuri', label: 'Bus Telolet Basuri', meters: 1100, power: 560 };
+  if (coins >= 30)   return { dir: 'down', type: 'ufo', label: 'UFO Alien Sedot MBG', meters: 650, power: 440 };
+  if (coins >= 20)   return { dir: 'down', type: 'kameha', label: 'Laser Kamehameha', meters: 420, power: 340 };
+  if (coins >= 10)   return { dir: 'down', type: 'soundhoreg', label: 'Truk Sound Horeg', meters: 250, power: 240 };
+  if (coins >= 5)    return { dir: 'up', type: 'kopdes', label: 'Truk Kopdes MBG', meters: 220, power: 180 };
+  if (coins >= 2)    return { dir: 'down', type: 'kaki', label: 'Injakan Kaki Raksasa', meters: 120, power: 145 };
+  return { dir: 'down', type: 'angkot', label: 'Angkot Biru Ngetem', meters: 60, power: 95 };
 }
 
 function connectTikTokRoom() {
@@ -154,26 +182,28 @@ function connectTikTokRoom() {
     retryTimer = setTimeout(() => { retryTimer = null; connectTikTokRoom(); }, retryMs);
   });
 
+  // TAP-TAP LAYAR (LIKE) REAL-TIME
   tiktok.on('like', (data) => {
     const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'penonton';
     const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
-    const avatar = data.profilePictureUrl || (data.user && data.user.profilePicture && data.user.profilePicture.url && data.user.profilePicture.url[0]) || '';
-    const likeCount = data.likeCount || 1;
+    const likeCount = Math.min(data.likeCount || 1, 15);
+    console.log('[TAP-TAP] @' + uniqueId + ' (' + likeCount + 'x like)');
     io.emit('live-event', {
       kind: 'boost',
       dir: 'up',
       type: 'tap',
+      label: 'Tap-Tap Layar',
       user: uniqueId,
       nickname,
-      avatar,
-      power: Math.min(likeCount * 6, 45)
+      meters: likeCount * 12,
+      power: Math.min(likeCount * 9, 85)
     });
   });
 
+  // KOMENTAR CHAT REAL-TIME
   tiktok.on('chat', (data) => {
     const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'penonton';
     const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
-    const avatar = data.profilePictureUrl || (data.user && data.user.profilePicture && data.user.profilePicture.url && data.user.profilePicture.url[0]) || '';
     const comment = (data.comment || '').trim();
     console.log('[CHAT] @' + uniqueId + ': ' + comment);
 
@@ -187,28 +217,28 @@ function connectTikTokRoom() {
       kind: 'chat',
       dir: 'up',
       type: 'chat',
+      label: 'Komen: ' + comment.slice(0, 24),
       user: uniqueId,
       nickname,
-      avatar,
       comment,
-      power: 35
+      meters: 35,
+      power: 55
     });
   });
 
+  // GIFT TIKTOK REAL-TIME (MURAH S/D SULTAN)
   tiktok.on('gift', (data) => {
     const giftType = data.giftType ?? (data.giftDetails && data.giftDetails.giftType) ?? 0;
     if (giftType === 1 && !data.repeatEnd) return;
     const uniqueId = data.uniqueId || (data.user && data.user.uniqueId) || 'sultan';
     const nickname = data.nickname || (data.user && data.user.nickname) || uniqueId;
-    const avatar = data.profilePictureUrl || (data.user && data.user.profilePicture && data.user.profilePicture.url && data.user.profilePicture.url[0]) || '';
     const count = data.repeatCount || 1;
     const diamondCount = data.diamondCount ?? (data.giftDetails && data.giftDetails.diamondCount) ?? 1;
     const coins = diamondCount * count;
     const gName = data.giftName || (data.giftDetails && data.giftDetails.giftName) || 'Gift';
-    const giftImg = data.giftPictureUrl || '';
     const act = mapGiftToAction(gName, coins);
 
-    console.log('[GIFT] @' + uniqueId + ' -> ' + gName + ' x' + count + ' (' + act.label + ')');
+    console.log('[GIFT REALTIME] @' + uniqueId + ' -> ' + gName + ' x' + count + ' (' + coins + 'c) => ' + act.label);
     io.emit('live-event', {
       kind: 'gift',
       dir: act.dir,
@@ -216,12 +246,11 @@ function connectTikTokRoom() {
       label: act.label,
       user: uniqueId,
       nickname,
-      avatar,
       giftName: gName,
       count,
-      giftImg,
       coins,
-      power: act.power * Math.min(count, 10)
+      meters: act.meters * count,
+      power: act.power * Math.min(count, 8)
     });
   });
 
@@ -240,8 +269,8 @@ io.on('connection', (socket) => {
 
 server.listen(3000, () => {
   console.log('====================================================');
-  console.log('SERVER MOBIL BOX MBG SPPG + DRAGGABLE SPOTIFY AKTIF');
-  console.log('URL LIVE STUDIO: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&sppg=1');
+  console.log('SERVER REAL-TIME PENONTON + GIFT LENGKAP AKTIF (@ptrgenz)');
+  console.log('URL LIVE STUDIO: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&realtime=1');
   console.log('====================================================');
   connectTikTokRoom();
 });
