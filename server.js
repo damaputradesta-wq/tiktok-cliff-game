@@ -92,14 +92,12 @@ let retryTimer = null;
 
 function mapGiftToAction(giftName, coins) {
   const name = (giftName || '').toLowerCase();
-  // Gift Bantu Maju / NAIK
   if (name.includes('persahabatan') || name.includes('kalung') || name.includes('hati') || name.includes('heart') || name.includes('cinta')) {
     return { dir: 'up', type: 'kopdes', label: 'Truk Kopdes', power: 180 };
   }
   if (name.includes('roket') || name.includes('pesawat') || name.includes('optimus')) {
     return { dir: 'up', type: 'jet', label: 'Turbo Jet MBG', power: 450 };
   }
-  // Gift Ganggu Mundur / TURUN
   if (name.includes('mawar') || name.includes('rose')) {
     return { dir: 'down', type: 'angkot', label: 'Angkot Biru', power: 95 };
   }
@@ -242,8 +240,8 @@ io.on('connection', (socket) => {
 
 server.listen(3000, () => {
   console.log('====================================================');
-  console.log('SERVER MBG HILL RACING + TIKTOK LIVE AKTIF (@ptrgenz)');
-  console.log('Buka di Live Studio: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&mbg=1');
+  console.log('SERVER MOBIL BOX MBG SPPG + DRAGGABLE SPOTIFY AKTIF');
+  console.log('URL LIVE STUDIO: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1&sppg=1');
   console.log('====================================================');
   connectTikTokRoom();
 });

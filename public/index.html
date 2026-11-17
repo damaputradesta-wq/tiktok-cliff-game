@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>MBG Racing Live TikTok - @ptrgenz</title>
+  <title>MBG SPPG Racing Live - @ptrgenz</title>
   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
@@ -18,10 +18,6 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: radial-gradient(circle at center, #1b2e4b 0%, #09101d 100%);
     }
     canvas {
       display: block;
@@ -29,13 +25,13 @@
       height: 100%;
     }
 
-    /* TOP BAR PERSIS VIDEO 2 (Menu + Musik + Progress Bar MBG 30.000 m) */
+    /* TOP BAR BERSIH TANPA TANDA TANYA */
     #top-hud {
       position: fixed;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
-      width: min(96vw, 680px);
+      width: min(95vw, 680px);
       display: flex;
       align-items: center;
       gap: 8px;
@@ -43,35 +39,37 @@
     }
     .hud-pill-btn {
       background: linear-gradient(180deg, #fffdf5 0%, #dcd5c5 100%);
-      border: 2px solid #4a5568;
+      border: 2px solid #334155;
       border-radius: 14px;
-      padding: 6px 12px;
+      padding: 6px 13px;
       font-size: 12px;
-      font-weight: 800;
-      color: #1a202c;
+      font-weight: 900;
+      color: #0f172a;
       cursor: pointer;
-      box-shadow: 0 3px 0 #2d3748, 0 4px 10px rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      gap: 4px;
+      box-shadow: 0 3px 0 #1e293b, 0 4px 10px rgba(0,0,0,0.35);
       flex-shrink: 0;
     }
-    .hud-pill-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #2d3748; }
+    .hud-pill-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #1e293b; }
+    .hud-pill-btn.green {
+      background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
+      color: #052e16;
+      border-color: #14532d;
+    }
 
     #progress-container {
       position: relative;
       flex: 1;
       height: 24px;
       background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-      border: 2.5px solid #cbd5e1;
+      border: 2.5px solid #e2e8f0;
       border-radius: 99px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5), inset 0 2px 5px rgba(0,0,0,0.8);
-      overflow: visible;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.45), inset 0 2px 5px rgba(0,0,0,0.8);
+      overflow: hidden;
     }
     #progress-fill {
       height: 100%;
       width: 10%;
-      background: linear-gradient(90deg, #22c55e 0%, #3b82f6 60%, #60a5fa 100%);
+      background: linear-gradient(90deg, #10b981 0%, #3b82f6 65%, #60a5fa 100%);
       border-radius: 99px;
       transition: width 0.15s linear;
     }
@@ -87,25 +85,8 @@
       text-shadow: 0 1px 3px #000, 0 0 6px #000;
       letter-spacing: 0.5px;
     }
-    #progress-truck-icon {
-      position: absolute;
-      top: -11px;
-      left: 0%;
-      transform: translateX(-50%);
-      font-size: 22px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
-      transition: left 0.15s linear;
-      pointer-events: none;
-    }
-    #progress-flag {
-      position: absolute;
-      right: -6px;
-      top: -10px;
-      font-size: 22px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
-    }
 
-    /* COUNTER FINISH & DEATH + STATUS LIVE (GAYA VIDEO 1) */
+    /* SCORE KANAN ATAS BERSIH TANPA ?? */
     #score-hud {
       position: fixed;
       top: 44px;
@@ -116,24 +97,24 @@
       text-shadow: 0 2px 6px rgba(0,0,0,0.9);
       pointer-events: none;
     }
-    #score-hud .finish-row { font-size: 20px; font-weight: 900; color: #facc15; }
-    #score-hud .death-row { font-size: 16px; font-weight: 800; color: #f87171; }
+    #score-hud .finish-row { font-size: 21px; font-weight: 900; color: #facc15; }
+    #score-hud .death-row { font-size: 16px; font-weight: 900; color: #f87171; }
     #live-status-badge {
       display: inline-block;
       margin-top: 4px;
-      padding: 3px 10px;
+      padding: 3px 11px;
       border-radius: 99px;
       font-size: 11px;
       font-weight: 800;
-      background: rgba(22, 163, 74, 0.85);
-      border: 1px solid #4ade80;
+      background: rgba(22, 163, 74, 0.9);
+      border: 1.5px solid #86efac;
       color: #fff;
     }
 
-    /* ANTREAN KOMBO AKTIF KIRI ATAS (PERSIS VIDEO 2) */
+    /* KOMBO AKTIF KIRI ATAS */
     #combo-stack {
       position: fixed;
-      top: 48px;
+      top: 46px;
       left: 16px;
       z-index: 95;
       display: flex;
@@ -145,78 +126,77 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: rgba(15, 23, 42, 0.78);
-      border: 1.5px solid rgba(250, 204, 21, 0.7);
+      background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid #facc15;
       border-radius: 10px;
-      padding: 3px 9px;
+      padding: 3px 10px;
       color: #fde047;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 900;
       text-shadow: 0 2px 4px #000;
-      animation: popIn 0.2s ease-out;
-    }
-    @keyframes popIn {
-      from { transform: scale(0.6); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
     }
 
-    /* SIDEBAR KAPSUL "TURUN" (KIRI) & "NAIK" (KANAN) PERSIS VIDEO 1 */
+    /* DAFTAR GIFT KIRI (TURUN) & KANAN (NAIK) BERSIH TANPA ?? */
     .gift-column {
       position: fixed;
-      top: 125px;
+      top: 120px;
       z-index: 90;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      width: 155px;
+      gap: 7px;
+      width: 162px;
       pointer-events: auto;
     }
     #col-turun { left: 12px; align-items: flex-start; }
     #col-naik { right: 12px; align-items: flex-end; }
 
     .col-header {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       letter-spacing: 1px;
-      padding: 2px 10px;
+      padding: 3px 12px;
       border-radius: 8px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.85);
       color: #fff;
     }
-    #col-turun .col-header { background: rgba(220, 38, 38, 0.85); border: 1.5px solid #fca5a5; }
-    #col-naik .col-header { background: rgba(22, 163, 74, 0.85); border: 1.5px solid #86efac; }
+    #col-turun .col-header { background: rgba(220, 38, 38, 0.9); border: 1.5px solid #fca5a5; }
+    #col-naik .col-header { background: rgba(22, 163, 74, 0.9); border: 1.5px solid #86efac; }
 
     .gift-pill {
       display: flex;
       align-items: center;
-      gap: 7px;
-      background: rgba(255, 255, 255, 0.92);
-      border: 2px solid #f43f5e;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      border: 2.5px solid #f43f5e;
       border-radius: 99px;
-      padding: 4px 10px;
+      padding: 5px 11px;
       color: #0f172a;
       font-size: 11.5px;
       font-weight: 800;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.35);
       cursor: pointer;
       transition: transform 0.12s;
     }
-    .gift-pill:hover { transform: scale(1.06); }
+    .gift-pill:hover { transform: scale(1.05); }
     #col-naik .gift-pill { border-color: #22c55e; flex-direction: row-reverse; }
-    .gift-pill .g-icon { font-size: 16px; }
+    .gift-pill .g-name { line-height: 1.15; }
     .gift-pill .g-coin {
-      font-size: 10px;
+      font-size: 10.5px;
+      font-weight: 900;
       color: #fff;
       background: #e11d48;
-      padding: 1px 6px;
+      padding: 2px 7px;
       border-radius: 99px;
+      flex-shrink: 0;
     }
     #col-naik .gift-pill .g-coin { background: #16a34a; }
 
-    /* SUBTITLE / NARASI TENGAH BAWAH PERSIS VIDEO 2 */
+    /* SUBTITLE TENGAH BAWAH */
     #live-subtitle {
       position: fixed;
-      bottom: 96px;
+      bottom: 94px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 98;
@@ -226,49 +206,50 @@
     }
     .sub-line1 {
       display: inline-block;
-      font-size: clamp(18px, 3vw, 28px);
+      font-size: clamp(18px, 2.8vw, 27px);
       font-weight: 900;
       color: #ffffff;
       text-transform: uppercase;
       text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 10px rgba(0,0,0,0.85);
       letter-spacing: 0.8px;
     }
-    .sub-highlight {
-      color: #ff2a85;
-    }
+    .sub-highlight { color: #ff2a85; }
 
-    /* MEME OVERLAY SAAT KENA METEOR / MINUS JAUH (PERSIS VIDEO 2) */
+    /* POPUP PERINGATAN SERANGAN BESAR */
     #meme-popup {
       position: fixed;
-      top: 14%;
+      top: 15%;
       left: 50%;
       transform: translateX(-50%) scale(0);
       z-index: 120;
-      width: 170px;
-      height: 170px;
-      background: rgba(15, 23, 42, 0.92);
-      border: 3px solid #38bdf8;
+      padding: 14px 22px;
+      background: rgba(15, 23, 42, 0.94);
+      border: 3px solid #facc15;
       border-radius: 18px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 12px 35px rgba(0,0,0,0.8);
-      transition: transform 0.28s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.85);
+      transition: transform 0.25s cubic-bezier(0.18, 0.89, 0.32, 1.28);
       pointer-events: none;
     }
     #meme-popup.show { transform: translateX(-50%) scale(1); }
-    #meme-popup .meme-face { font-size: 74px; line-height: 1; }
+    #meme-popup .meme-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #ef4444;
+      text-shadow: 0 2px 4px #000;
+    }
     #meme-popup .meme-caption {
-      margin-top: 6px;
-      font-size: 12px;
+      margin-top: 4px;
+      font-size: 13px;
       font-weight: 900;
       color: #facc15;
       text-align: center;
-      padding: 0 6px;
     }
 
-    /* 3 PEDAL BAWAH PERSIS VIDEO 2 ([SPASI] STOP | RPM | [SPASI] AUTO) */
+    /* 3 PEDAL BAWAH */
     #bottom-pedals {
       position: fixed;
       bottom: 12px;
@@ -333,62 +314,85 @@
     #gauge-speed { font-size: 16px; font-weight: 900; color: #38bdf8; }
     #gauge-unit { font-size: 9px; font-weight: 800; color: #94a3b8; }
 
-    /* DRAWER SPOTIFY FULL TRACK (Bisa dibuka/tutup lewat tombol ?? di kiri atas) */
+    /* PEMUTAR LAGU SPOTIFY BISA DIGESER BEBAS (DRAGGABLE) */
     #sp-player {
       position: fixed;
-      top: 46px;
-      left: 16px;
-      z-index: 200;
-      width: 295px;
+      bottom: 16px;
+      right: 16px;
+      z-index: 300;
+      width: 285px;
       background: rgba(15, 18, 25, 0.96);
       border: 2px solid #1db954;
-      border-radius: 16px;
-      padding: 10px 12px;
+      border-radius: 14px;
+      padding: 8px 11px 10px 11px;
       color: #fff;
       box-shadow: 0 12px 30px rgba(0,0,0,0.85);
       display: flex;
       flex-direction: column;
-      gap: 7px;
-      transition: opacity 0.25s, transform 0.25s;
+      gap: 6px;
+      touch-action: none;
     }
     #sp-player.minimized {
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(-12px) scale(0.95);
+      display: none !important;
+    }
+    #sp-drag-handle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(29, 185, 84, 0.16);
+      border: 1px dashed rgba(29, 185, 84, 0.55);
+      border-radius: 8px;
+      padding: 3px 8px;
+      cursor: grab;
+      font-size: 10px;
+      font-weight: 800;
+      color: #4ade80;
+      letter-spacing: 0.5px;
+    }
+    #sp-drag-handle:active { cursor: grabbing; }
+    #sp-close-btn {
+      background: #dc2626;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 10px;
+      font-weight: 900;
+      cursor: pointer;
     }
     .sp-top { display: flex; align-items: center; gap: 9px; }
     #sp-disc-wrap {
-      width: 44px;
-      height: 44px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       overflow: hidden;
       border: 2px solid #1db954;
       flex-shrink: 0;
       background: #111;
     }
-    #yt-bgm-frame { width: 44px; height: 44px; border: none; pointer-events: none; transform: scale(1.35); }
+    #yt-bgm-frame { width: 42px; height: 42px; border: none; pointer-events: none; transform: scale(1.35); }
     .sp-info { flex: 1; overflow: hidden; }
-    .sp-badge-row { display: flex; justify-content: space-between; font-size: 9.5px; font-weight: 800; color: #1db954; }
-    #sp-title { font-size: 12.5px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #sp-artist { font-size: 10.5px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sp-badge-row { display: flex; justify-content: space-between; font-size: 9px; font-weight: 800; color: #1db954; }
+    #sp-title { font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #sp-artist { font-size: 10px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sp-progress-bg { width: 100%; height: 4px; background: #27272a; border-radius: 99px; overflow: hidden; }
     #sp-progress-fill { width: 0%; height: 100%; background: #1db954; }
     .sp-controls { display: flex; gap: 4px; align-items: center; }
     .sp-btn {
-      width: 26px; height: 26px; border-radius: 50%; border: 1px solid #3f3f46;
-      background: #27272a; color: #fff; cursor: pointer; font-size: 10px;
+      width: 25px; height: 25px; border-radius: 50%; border: 1px solid #3f3f46;
+      background: #27272a; color: #fff; cursor: pointer; font-size: 9px; font-weight: 900;
     }
-    .sp-btn.main { background: #1db954; color: #000; border: none; font-weight: 900; width: 30px; height: 30px; }
+    .sp-btn.main { background: #1db954; color: #000; border: none; width: 29px; height: 29px; }
     .sp-search-row { display: flex; gap: 5px; align-items: center; }
     #sp-search-input {
       flex: 1; background: #18181b; border: 1px solid #3f3f46; border-radius: 7px;
-      color: #fff; font-size: 11px; padding: 4px 7px; outline: none;
+      color: #fff; font-size: 10.5px; padding: 4px 7px; outline: none;
     }
     #sp-search-btn {
       background: #1db954; color: #000; border: none; border-radius: 7px;
-      font-size: 11px; font-weight: 800; padding: 4px 8px; cursor: pointer;
+      font-size: 10.5px; font-weight: 800; padding: 4px 8px; cursor: pointer;
     }
-    #sp-vol { width: 46px; accent-color: #1db954; }
+    #sp-vol { width: 44px; accent-color: #1db954; }
   </style>
 </head>
 <body>
@@ -396,77 +400,75 @@
     <canvas id="gameCanvas"></canvas>
   </div>
 
-  <!-- TOP HUD PERSIS VIDEO 2 -->
+  <!-- TOP HUD BERSIH TANPA ?? -->
   <div id="top-hud">
-    <button class="hud-pill-btn" id="btn-toggle-ui" title="Tampilkan/Sembunyikan Daftar Gift">Menu</button>
-    <button class="hud-pill-btn" id="btn-toggle-music" title="Buka/Tutup Spotify Lagu">??</button>
+    <button class="hud-pill-btn" id="btn-toggle-ui">Menu</button>
+    <button class="hud-pill-btn green" id="btn-toggle-music">Musik</button>
     <div id="progress-container">
       <div id="progress-fill"></div>
-      <div id="progress-truck-icon">??</div>
       <div id="progress-text">0 m / 30.000 m</div>
-      <div id="progress-flag">??</div>
     </div>
   </div>
 
-  <!-- SCORE & STATUS KANAN ATAS PERSIS VIDEO 1 -->
+  <!-- SCORE & STATUS KANAN ATAS BERSIH TANPA ?? -->
   <div id="score-hud">
-    <div class="finish-row">?? Finish <span id="val-finish">0</span>/100</div>
-    <div class="death-row">?? Gagal: <span id="val-death">0</span></div>
-    <div id="live-status-badge">Menghubungkan @ptrgenz...</div>
+    <div class="finish-row">Finish <span id="val-finish">0</span>/100</div>
+    <div class="death-row">Gagal: <span id="val-death">0</span></div>
+    <div id="live-status-badge">LIVE: @ptrgenz</div>
   </div>
 
-  <!-- STACK KOMBO KIRI ATAS PERSIS VIDEO 2 -->
+  <!-- STACK KOMBO KIRI ATAS -->
   <div id="combo-stack"></div>
 
-  <!-- KOLOM KIRI: TURUN / MUNDUR (Klik untuk Tes Langsung) -->
+  <!-- KOLOM KIRI: TURUN / MUNDUR (TANPA ??) -->
   <div id="col-turun" class="gift-column">
     <div class="col-header">TURUN</div>
     <div class="gift-pill" data-dir="down" data-type="angkot" data-label="Angkot Biru" data-power="95">
-      <span class="g-icon">??</span><span>Mawar (Angkot)</span><span class="g-coin">1c</span>
+      <span class="g-name">Mawar (Angkot)</span><span class="g-coin">1c</span>
     </div>
     <div class="gift-pill" data-dir="down" data-type="kaki" data-label="Kaki Raksasa" data-power="140">
-      <span class="g-icon">??</span><span>Es Krim (Kaki)</span><span class="g-coin">2c</span>
+      <span class="g-name">Es Krim (Kaki)</span><span class="g-coin">2c</span>
     </div>
     <div class="gift-pill" data-dir="down" data-type="soundhoreg" data-label="Truk Sound Horeg" data-power="260">
-      <span class="g-icon">??</span><span>Rosa (SoundHoreg)</span><span class="g-coin">10c</span>
+      <span class="g-name">Rosa (SoundHoreg)</span><span class="g-coin">10c</span>
     </div>
     <div class="gift-pill" data-dir="down" data-type="kameha" data-label="Laser Kamehameha" data-power="380">
-      <span class="g-icon">?</span><span>Beruang (Luffy/Goku)</span><span class="g-coin">20c</span>
+      <span class="g-name">Beruang (Luffy/Goku)</span><span class="g-coin">20c</span>
     </div>
     <div class="gift-pill" data-dir="down" data-type="ufo" data-label="UFO Alien" data-power="520">
-      <span class="g-icon">??</span><span>Donat (UFO)</span><span class="g-coin">30c</span>
+      <span class="g-name">Donat (UFO)</span><span class="g-coin">30c</span>
     </div>
     <div class="gift-pill" data-dir="down" data-type="meteor" data-label="Meteor Api Raksasa" data-power="900">
-      <span class="g-icon">??</span><span>Sultan (Meteor)</span><span class="g-coin">100c</span>
+      <span class="g-name">Sultan (Meteor)</span><span class="g-coin">100c</span>
     </div>
   </div>
 
-  <!-- KOLOM KANAN: NAIK / MAJU (Klik untuk Tes Langsung) -->
+  <!-- KOLOM KANAN: NAIK / MAJU (TANPA ??) -->
   <div id="col-naik" class="gift-column">
     <div class="col-header">NAIK</div>
     <div class="gift-pill" data-dir="up" data-type="tap" data-label="Dorongan Warga" data-power="35">
-      <span class="g-icon">??</span><span>Tap / Komen</span><span class="g-coin">Free</span>
+      <span class="g-name">Tap / Komen</span><span class="g-coin">Free</span>
     </div>
     <div class="gift-pill" data-dir="up" data-type="kopdes" data-label="Truk Kopdes" data-power="180">
-      <span class="g-icon">??</span><span>Kalung (Kopdes)</span><span class="g-coin">5c</span>
+      <span class="g-name">Kalung (Kopdes)</span><span class="g-coin">5c</span>
     </div>
     <div class="gift-pill" data-dir="up" data-type="jet" data-label="Turbo Jet MBG" data-power="450">
-      <span class="g-icon">??</span><span>Roket (Turbo MBG)</span><span class="g-coin">30c</span>
+      <span class="g-name">Roket (Turbo MBG)</span><span class="g-coin">30c</span>
     </div>
   </div>
 
-  <!-- MEME POPUP SAAT KENA METEOR / MUNDUR JAUH -->
+  <!-- POPUP PERINGATAN SERANGAN BESAR -->
   <div id="meme-popup">
-    <div class="meme-face">??</div>
-    <div class="meme-caption">YAAH KENA METEOR LAGI!</div>
+    <div class="meme-title">AWAS SERANGAN SULTAN!</div>
+    <div class="meme-caption">MOBIL MBG TERPENTAL MUNDUR!</div>
   </div>
 
-  <!-- SUBTITLE BAWAH PERSIS VIDEO 2 -->
+  <!-- SUBTITLE BAWAH -->
   <div id="live-subtitle">
-    <div class="sub-line1" id="sub-text">MISI NGANTERIN <span class="sub-highlight">MBG</span> SAMPAI KE SEKOLAH!</div>
+    <div class="sub-line1" id="sub-text">MISI NGANTERIN <span class="sub-highlight">MBG SPPG</span> SAMPAI KE SEKOLAH!</div>
   </div>
 
-  <!-- 3 PEDAL BAWAH PERSIS VIDEO 2 -->
+  <!-- 3 PEDAL BAWAH -->
   <div id="bottom-pedals">
     <div class="pedal-box brake" id="pedal-stop">
       <div class="pedal-grid"></div>
@@ -482,8 +484,12 @@
     </div>
   </div>
 
-  <!-- SPOTIFY FULL LAGU WIDGET -->
+  <!-- SPOTIFY PLAYER BISA DIGESER BEBAS (DRAGGABLE) -->
   <div id="sp-player">
+    <div id="sp-drag-handle">
+      <span>:: GESER KOTAK MUSIK INI BEBAS ::</span>
+      <button id="sp-close-btn" title="Sembunyikan">X</button>
+    </div>
     <div class="sp-top">
       <div id="sp-disc-wrap"><div id="yt-bgm-frame"></div></div>
       <div class="sp-info">
@@ -495,9 +501,9 @@
         <div id="sp-artist">Raim Laode</div>
       </div>
       <div class="sp-controls">
-        <button class="sp-btn" id="sp-prev">&#9664;</button>
-        <button class="sp-btn main" id="sp-toggle">&#9654;</button>
-        <button class="sp-btn" id="sp-next">&#9654;&#9654;</button>
+        <button class="sp-btn" id="sp-prev">&lt;</button>
+        <button class="sp-btn main" id="sp-toggle">II</button>
+        <button class="sp-btn" id="sp-next">&gt;</button>
       </div>
     </div>
     <div class="sp-progress-bg"><div id="sp-progress-fill"></div></div>
@@ -511,7 +517,43 @@
   <script>
   (function() {
     // ========================================================================
-    // A. MESIN GAME "MBG HILL CLIMB RACING" (PERSIS VIDEO 2 + HUD VIDEO 1)
+    // 1. FITUR GESER BEBAS (DRAGGABLE) UNTUK KOTAK MUSIK SPOTIFY
+    // ========================================================================
+    const spPlayer = document.getElementById('sp-player');
+    const dragHandle = document.getElementById('sp-drag-handle');
+    const closeBtn = document.getElementById('sp-close-btn');
+    let isDragging = false;
+    let dragOffX = 0;
+    let dragOffY = 0;
+
+    dragHandle.addEventListener('pointerdown', (e) => {
+      if (e.target === closeBtn) return;
+      isDragging = true;
+      const rect = spPlayer.getBoundingClientRect();
+      dragOffX = e.clientX - rect.left;
+      dragOffY = e.clientY - rect.top;
+      spPlayer.style.right = 'auto';
+      spPlayer.style.bottom = 'auto';
+      spPlayer.style.left = rect.left + 'px';
+      spPlayer.style.top = rect.top + 'px';
+      dragHandle.setPointerCapture(e.pointerId);
+    });
+
+    dragHandle.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const maxX = window.innerWidth - spPlayer.offsetWidth - 6;
+      const maxY = window.innerHeight - spPlayer.offsetHeight - 6;
+      const nx = Math.max(6, Math.min(e.clientX - dragOffX, maxX));
+      const ny = Math.max(6, Math.min(e.clientY - dragOffY, maxY));
+      spPlayer.style.left = nx + 'px';
+      spPlayer.style.top = ny + 'px';
+    });
+
+    dragHandle.addEventListener('pointerup', () => { isDragging = false; });
+    closeBtn.addEventListener('click', () => spPlayer.classList.add('minimized'));
+
+    // ========================================================================
+    // 2. MESIN GAME & DESAIN MOBIL BOX MBG SPPG (BADAN GIZI NASIONAL)
     // ========================================================================
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -524,21 +566,18 @@
     resizeCanvas();
 
     const GOAL_DIST = 30000;
-    let dist = 0;          // Posisi meter (bisa minus seperti di Video 1 & 2)
-    let vel = 2.8;         // Kecepatan berjalan otomatis
+    let dist = 0;
+    let vel = 2.8;
     let autoGas = true;
     let finishCount = 0;
     let deathCount = 0;
     let wheelAngle = 0;
     let shakeTime = 0;
 
-    // Daftar unit yang sedang mendorong maju / mundur di jalan
     const activeUnits = [];
-    // Partikel asap, api meteor, dan koin
     const particles = [];
 
     const progFill = document.getElementById('progress-fill');
-    const progTruck = document.getElementById('progress-truck-icon');
     const progText = document.getElementById('progress-text');
     const valFinish = document.getElementById('val-finish');
     const valDeath = document.getElementById('val-death');
@@ -554,13 +593,12 @@
     }
 
     function triggerMeme(caption) {
-      memePopup.querySelector('.meme-caption').textContent = caption || 'YAAH MUNDUR JAUH!';
+      memePopup.querySelector('.meme-caption').textContent = caption || 'MOBIL MBG TERPENTAL MUNDUR!';
       memePopup.classList.add('show');
       clearTimeout(window.__memeTimer);
-      window.__memeTimer = setTimeout(() => memePopup.classList.remove('show'), 2800);
+      window.__memeTimer = setTimeout(() => memePopup.classList.remove('show'), 2600);
     }
 
-    // Fungsi tinggi permukaan jalan berbukit (Hill Climb curve)
     function getRoadY(worldX, baseH) {
       return baseH
         + Math.sin(worldX * 0.0028) * 52
@@ -574,7 +612,6 @@
       return Math.atan2(y2 - y1, 20);
     }
 
-    // Spawn Unit Interaktif (Angkot, Sound Horeg, Truk Kopdes, UFO, Kameha, Meteor)
     function spawnLiveUnit(ev) {
       const dir = ev.dir || 'down';
       const type = ev.type || 'angkot';
@@ -587,11 +624,11 @@
         setSubtitle('@' + sender.toUpperCase(), 'BANTU DORONG MBG MAJU!');
         for (let i = 0; i < 8; i++) {
           particles.push({
-            x: canvas.width * 0.42 - 45,
-            y: canvas.height * 0.56,
+            x: canvas.width * 0.44 - 55,
+            y: canvas.height * 0.58,
             vx: -Math.random() * 5 - 2,
             vy: (Math.random() - 0.5) * 3,
-            size: Math.random() * 8 + 4,
+            size: Math.random() * 7 + 4,
             color: '#38bdf8',
             life: 25
           });
@@ -599,18 +636,17 @@
         return;
       }
 
-      // Dorongan kecepatan langsung
       if (dir === 'up') {
         vel = Math.min(vel + Math.min(power * 0.04, 18), 22);
         setSubtitle('@' + sender.toUpperCase() + ' KIRIM', (ev.label || 'TRUK KOPDES') + '!');
         speakIndo(sender + ' membantu dorong mobil MBG dengan ' + (ev.label || 'Truk Kopdes'));
       } else {
         vel = Math.max(vel - Math.min(power * 0.055, 26), -24);
-        shakeTime = 28;
-        setSubtitle((ev.giftName || 'GIFT').toUpperCase() + ' DIDORONG', (ev.label || 'ANGKOT') + '!');
+        shakeTime = 26;
+        setSubtitle('@' + sender.toUpperCase() + ' KIRIM', (ev.label || 'ANGKOT') + '!');
         speakIndo('Awas! ' + sender + ' mengirim ' + (ev.label || 'serangan') + '!');
         if (type === 'meteor' || power >= 450) {
-          triggerMeme('OH KOK MOBIL MBG GUE KENA ' + (ev.label || 'METEOR').toUpperCase() + '?!');
+          triggerMeme('MOBIL MBG KENA ' + (ev.label || 'METEOR').toUpperCase() + ' DARI @' + sender.toUpperCase() + '!');
         }
       }
 
@@ -622,8 +658,7 @@
         count,
         power,
         timer: 190,
-        maxTimer: 190,
-        offset: dir === 'up' ? -150 : 210
+        offset: dir === 'up' ? -155 : 210
       });
 
       renderComboBadges();
@@ -631,85 +666,241 @@
 
     function renderComboBadges() {
       const counts = {};
-      const icons = {
-        angkot: '??',
-        kaki: '??',
-        soundhoreg: '??',
-        kameha: '?',
-        ufo: '??',
-        meteor: '??',
-        kopdes: '??',
-        jet: '??'
-      };
       activeUnits.forEach(u => {
-        counts[u.type] = (counts[u.type] || 0) + (u.count || 1);
+        counts[u.label] = (counts[u.label] || 0) + (u.count || 1);
       });
       comboStack.innerHTML = Object.keys(counts).map(k =>
-        '<div class="combo-badge">' + (icons[k] || '??') + ' x' + counts[k] + '</div>'
+        '<div class="combo-badge">' + k + ' x' + counts[k] + '</div>'
       ).join('');
     }
 
-    // Gambar Truk / Kendaraan / Efek di atas jalan
-    function drawVehicleBox(x, y, slope, w, h, bodyColor, cabinColor, titleText, subTitle, isFacingLeft) {
+    // GAMBAR MOBIL BOX MBG SPPG (GRAN MAX / CARRY BADAN GIZI NASIONAL PERSIS FOTO GOOGLE)
+    function drawMobilBoxMBG(x, y, slope) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(slope);
+
+      // Bayangan aspal
+      ctx.fillStyle = 'rgba(0,0,0,0.38)';
+      ctx.beginPath();
+      ctx.ellipse(0, 4, 68, 8, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sasis Bawah Hitam
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-58, -18, 114, 10);
+
+      // 1. BOX KARGO BELAKANG (Hijau Mint Resmi SPPG + Frame Aluminium)
+      ctx.fillStyle = '#bfe3dc';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.roundRect(-64, -74, 82, 58, 4);
+      ctx.fill();
+      ctx.stroke();
+
+      // Garis lis dalam Box Kargo
+      ctx.strokeStyle = '#649e94';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(-60, -70, 74, 50);
+
+      // Ornamen Batik Hitam di Pojok Kiri Box (Persis Foto Mobil MBG)
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(-58, -68, 9, 0, Math.PI * 0.5);
+      ctx.arc(-58, -68, 14, 0, Math.PI * 0.5);
+      ctx.moveTo(-58, -50);
+      ctx.quadraticCurveTo(-46, -58, -58, -64);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(-58, -22, 10, -Math.PI * 0.5, 0);
+      ctx.arc(-58, -22, 15, -Math.PI * 0.5, 0);
+      ctx.stroke();
+
+      // Logo Bulat BADAN GIZI NASIONAL di Tengah Atas Box
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(-22, -57, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(-22, -57, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Tulisan "SATUAN PELAYANAN PEMENUHAN GIZI"
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 7.2px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('SATUAN PELAYANAN', -22, -41);
+      ctx.fillText('PEMENUHAN GIZI', -22, -33);
+
+      // Garis & Sub-teks "BADAN GIZI NASIONAL"
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-48, -29);
+      ctx.lineTo(4, -29);
+      ctx.stroke();
+      ctx.font = 'bold 5.5px sans-serif';
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fillText('BADAN GIZI NASIONAL', -22, -22);
+
+      // 2. TOPI KABIN AERODINAMIS (WIND DEFLECTOR) DI ATAS ATAP KABIN
+      ctx.fillStyle = '#d5efe9';
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(18, -73);
+      ctx.quadraticCurveTo(36, -72, 45, -55);
+      ctx.lineTo(18, -55);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // 3. KABIN DEPAN GRAN MAX / CARRY PUTIH-MINT
+      ctx.fillStyle = '#e6f4f1';
+      ctx.beginPath();
+      ctx.moveTo(18, -55);
+      ctx.lineTo(46, -55);
+      ctx.lineTo(60, -35);
+      ctx.lineTo(64, -16);
+      ctx.lineTo(18, -16);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Jendela Kabin & Sopir Berkacamata
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.moveTo(23, -51);
+      ctx.lineTo(43, -51);
+      ctx.lineTo(54, -36);
+      ctx.lineTo(23, -36);
+      ctx.closePath();
+      ctx.fill();
+
+      // Kepala Sopir & Kacamata Hitam
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(36, -43, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.fillRect(34, -45, 6, 2.5);
+
+      // Logo Pintu Kabin Depan
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(34, -26, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.arc(34, -26, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 5px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('SPPG', 41, -24);
+
+      // Lampu Depan & Pita/Bumper Merah Khas Peluncuran MBG
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(58, -31, 5, 6);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(58, -23, 7, 8);
+
+      // 4. RODA DEPAN & BELAKANG VELG SILVER REALISTIS
+      [-38, 42].forEach(wx => {
+        // Fender Lengkungan Roda
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(wx, -10, 15, Math.PI, 0);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(wx, -9);
+        ctx.rotate(wheelAngle);
+
+        // Ban Karet Hitam
+        ctx.fillStyle = '#111827';
+        ctx.beginPath();
+        ctx.arc(0, 0, 13, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Velg Baja Silver
+        ctx.fillStyle = '#cbd5e1';
+        ctx.beginPath();
+        ctx.arc(0, 0, 7.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Lubang Baut Velg
+        ctx.fillStyle = '#334155';
+        for (let b = 0; b < 4; b++) {
+          const a = b * (Math.PI / 2);
+          ctx.beginPath();
+          ctx.arc(Math.cos(a) * 4.2, Math.sin(a) * 4.2, 1.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+      });
+
+      ctx.restore();
+    }
+
+    // Gambar Kendaraan Tantangan (Angkot, Sound Horeg, Kopdes)
+    function drawChallengeVehicle(x, y, slope, w, h, bodyColor, cabinColor, titleText, subTitle, isFacingLeft) {
       ctx.save();
       ctx.translate(x, y);
       ctx.rotate(slope);
       if (isFacingLeft) ctx.scale(-1, 1);
 
-      // Bayangan bawah
       ctx.fillStyle = 'rgba(0,0,0,0.35)';
       ctx.beginPath();
       ctx.ellipse(0, 4, w * 0.48, 7, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Box Kargo Belakang
       ctx.fillStyle = bodyColor;
       ctx.strokeStyle = '#1e293b';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2.2;
       ctx.beginPath();
       ctx.roundRect(-w * 0.5, -h - 8, w * 0.68, h, 6);
       ctx.fill();
       ctx.stroke();
 
-      // Kabin Depan
       ctx.fillStyle = cabinColor;
       ctx.beginPath();
       ctx.roundRect(w * 0.16, -h * 0.78 - 8, w * 0.34, h * 0.78, [0, 8, 4, 0]);
       ctx.fill();
       ctx.stroke();
 
-      // Kaca Jendela
       ctx.fillStyle = '#bae6fd';
       ctx.fillRect(w * 0.24, -h * 0.7 - 6, w * 0.2, h * 0.34);
 
-      // Tulisan pada Box
       if (!isFacingLeft) {
         ctx.fillStyle = '#0f172a';
-        ctx.font = 'bold 10px sans-serif';
+        ctx.font = 'bold 9.5px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(titleText, -w * 0.16, -h * 0.52 - 6);
-        ctx.fillStyle = '#15803d';
+        ctx.fillStyle = '#dc2626';
         ctx.font = 'bold 8px sans-serif';
         ctx.fillText(subTitle || '', -w * 0.16, -h * 0.26 - 6);
       }
 
-      // Roda Depan & Belakang
       [-w * 0.28, w * 0.3].forEach(wx => {
         ctx.save();
-        ctx.translate(wx, -6);
+        ctx.translate(wx, -7);
         ctx.rotate(wheelAngle);
         ctx.fillStyle = '#111827';
         ctx.beginPath();
         ctx.arc(0, 0, 11, 0, Math.PI * 2);
         ctx.fill();
-        ctx.strokeStyle = '#9ca3af';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = '#cbd5e1';
         ctx.beginPath();
-        ctx.arc(0, 0, 5, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(-8, 0); ctx.lineTo(8, 0);
-        ctx.stroke();
+        ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
       });
 
@@ -720,9 +911,8 @@
     function updateAndDraw() {
       const W = canvas.width;
       const H = canvas.height;
-      const baseRoadY = H * 0.63;
+      const baseRoadY = H * 0.64;
 
-      // Fisika Kecepatan & Gravitasi Tanjakan
       const worldX = dist * 9;
       const slope = getRoadSlope(worldX);
 
@@ -732,10 +922,9 @@
         vel *= 0.92;
       }
 
-      // Efek dorongan dari unit aktif
       activeUnits.forEach(u => {
         u.timer--;
-        u.offset *= 0.88; // Merapat ke mobil MBG
+        u.offset *= 0.88;
         if (u.dir === 'up') vel += 0.22;
         else vel -= 0.32;
       });
@@ -750,7 +939,6 @@
       dist += vel * 0.16;
       wheelAngle += vel * 0.08;
 
-      // Cek Menang (30.000 m) atau Gagal Jauh (-1.000 m)
       if (dist >= GOAL_DIST) {
         finishCount++;
         valFinish.textContent = finishCount;
@@ -763,14 +951,12 @@
         valDeath.textContent = deathCount;
         dist = 0;
         vel = 3;
-        triggerMeme('GAGAL NGANTERIN MBG! ULANG DARI POSKO!');
+        triggerMeme('GAGAL NGANTERIN MBG! ULANG DARI POSKO SPPG!');
         speakIndo('Yah gagal sampai sekolah, ulang lagi dari posko!');
       }
 
-      // Update UI Top Progress Bar & Speedometer
       const pct = Math.max(0, Math.min((dist / GOAL_DIST) * 100, 100));
       progFill.style.width = pct + '%';
-      progTruck.style.left = pct + '%';
       progText.textContent = Math.round(dist).toLocaleString('id-ID') + ' m / 30.000 m';
       gaugeSpeed.textContent = Math.round(Math.abs(vel) * 14);
 
@@ -780,7 +966,7 @@
         ctx.translate((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
       }
 
-      // 1. LANGIT CERAH & AWAN PEGUNUNGAN INDONESIA
+      // 1. LANGIT & PEGUNUNGAN
       const skyGrad = ctx.createLinearGradient(0, 0, 0, baseRoadY);
       skyGrad.addColorStop(0, '#3b82f6');
       skyGrad.addColorStop(0.55, '#93c5fd');
@@ -788,7 +974,6 @@
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, W, H);
 
-      // 2. GUNUNG BIRU DI KEJAUHAN (Parallax Lambat)
       const mtnOffset = -((worldX * 0.06) % (W * 1.2));
       for (let m = -1; m <= 2; m++) {
         const mx = mtnOffset + m * (W * 0.85);
@@ -800,7 +985,6 @@
         ctx.closePath();
         ctx.fill();
 
-        // Bukit Hijau & Sawah Terasering
         ctx.fillStyle = '#15803d';
         ctx.beginPath();
         ctx.moveTo(mx - 80, baseRoadY);
@@ -808,7 +992,7 @@
         ctx.fill();
       }
 
-      // 3. POHON PINUS, SAWAH, SAUNG KAYU, & POSKO SPPG (Parallax Menengah)
+      // 2. POHON PINUS, SAUNG, & GEDUNG POSKO SPPG
       const treeSpacing = 180;
       const firstTreeIdx = Math.floor((worldX - W) / treeSpacing);
       const lastTreeIdx = Math.ceil((worldX + W) / treeSpacing);
@@ -819,20 +1003,18 @@
         const screenX = mbgScreenX + (objWorldX - worldX);
         const groundY = getRoadY(objWorldX, baseRoadY);
 
-        // Posko Dapur MBG di titik 0m
         if (idx === 0) {
           ctx.fillStyle = '#f8fafc';
-          ctx.fillRect(screenX - 110, groundY - 95, 170, 90);
-          ctx.fillStyle = '#1d4ed8';
-          ctx.fillRect(screenX - 118, groundY - 118, 186, 26);
+          ctx.fillRect(screenX - 110, groundY - 95, 175, 90);
+          ctx.fillStyle = '#0f766e';
+          ctx.fillRect(screenX - 118, groundY - 120, 190, 28);
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 9px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText('SATUAN PELAYANAN PEMENUHAN GIZI', screenX - 25, groundY - 102);
+          ctx.fillText('DAPUR SPPG - BADAN GIZI NASIONAL', screenX - 22, groundY - 103);
           continue;
         }
 
-        // Pohon Pinus / Cemara Tinggi
         ctx.fillStyle = '#5c4033';
         ctx.fillRect(screenX - 6, groundY - 120, 12, 120);
         ctx.fillStyle = '#166534';
@@ -842,7 +1024,6 @@
           ctx.fill();
         }
 
-        // Saung Kayu / Pondok Desa setiap kelipatan 3
         if (Math.abs(idx) % 3 === 1) {
           const sx = screenX + 65;
           const sy = getRoadY(objWorldX + 65, baseRoadY);
@@ -858,7 +1039,7 @@
         }
       }
 
-      // 4. TANAH TEBING, SUNGAI & JALAN RAYA ASPAL BERGELOMBANG
+      // 3. TANAH & JALAN ASPAL
       ctx.beginPath();
       ctx.moveTo(0, H);
       for (let sx = 0; sx <= W; sx += 12) {
@@ -875,7 +1056,6 @@
       ctx.fillStyle = soilGrad;
       ctx.fill();
 
-      // Permukaan Aspal
       ctx.beginPath();
       for (let sx = 0; sx <= W; sx += 10) {
         const wx = worldX + (sx - mbgScreenX);
@@ -891,48 +1071,45 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // 5. GAMBAR MOBIL UTAMA: MOBIL MBG (MAKAN BERGIZI GRATIS)
+      // 4. GAMBAR MOBIL BOX MBG SPPG RESMI
       const mbgY = getRoadY(worldX, baseRoadY);
-      drawVehicleBox(mbgScreenX, mbgY, slope, 96, 48, '#ffffff', '#f1f5f9', 'MBG GRATIS', 'DAPUR SPPG', false);
+      drawMobilBoxMBG(mbgScreenX, mbgY, slope);
 
-      // 6. GAMBAR UNIT GIFT PENGGANGGU (MUNDUR) & PEMBANTU (MAJU)
+      // 5. GAMBAR UNIT GIFT TANTANGAN PENONTON
       activeUnits.forEach(u => {
-        const unitScreenX = mbgScreenX + (u.dir === 'up' ? -98 + u.offset : 98 + u.offset);
+        const unitScreenX = mbgScreenX + (u.dir === 'up' ? -118 + u.offset : 118 + u.offset);
         const unitWorldX = worldX + (unitScreenX - mbgScreenX);
         const unitY = getRoadY(unitWorldX, baseRoadY);
         const unitSlope = getRoadSlope(unitWorldX);
 
-        // Nama Pengirim di atas unit
         ctx.save();
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillStyle = '#fde047';
         ctx.shadowColor = '#000';
         ctx.shadowBlur = 4;
-        ctx.fillText('@' + u.sender + ' (' + u.label + ')', unitScreenX, unitY - 82);
+        ctx.fillText('@' + u.sender + ' (' + u.label + ')', unitScreenX, unitY - 88);
         ctx.restore();
 
         if (u.type === 'angkot') {
-          drawVehicleBox(unitScreenX, unitY, unitSlope, 78, 40, '#0284c7', '#38bdf8', 'ANGKOT', '', true);
+          drawChallengeVehicle(unitScreenX, unitY, unitSlope, 82, 42, '#0284c7', '#38bdf8', 'ANGKOT', '', true);
         } else if (u.type === 'soundhoreg') {
-          drawVehicleBox(unitScreenX, unitY, unitSlope, 108, 54, '#1e1b4b', '#facc15', 'SOUND HOREG', 'BASS BOOST', true);
-          // Gelombang speaker warna-warni
+          drawChallengeVehicle(unitScreenX, unitY, unitSlope, 110, 56, '#1e1b4b', '#facc15', 'SOUND HOREG', 'BASS', true);
           ctx.strokeStyle = (u.timer % 6 < 3) ? '#ec4899' : '#22d3ee';
           ctx.lineWidth = 3;
           ctx.beginPath();
-          ctx.arc(unitScreenX - 35, unitY - 35, 25 + (u.timer % 15), 0, Math.PI * 2);
+          ctx.arc(unitScreenX - 35, unitY - 38, 24 + (u.timer % 15), 0, Math.PI * 2);
           ctx.stroke();
         } else if (u.type === 'kopdes' || u.type === 'jet') {
-          drawVehicleBox(unitScreenX, unitY, unitSlope, 105, 50, '#ffffff', '#ef4444', 'TRUK KOPDES', 'BANTU MBG', false);
+          drawChallengeVehicle(unitScreenX, unitY, unitSlope, 106, 52, '#ffffff', '#ef4444', 'TRUK KOPDES', 'BANTU MBG', false);
         } else if (u.type === 'ufo') {
-          // UFO Terbang menyedot dari atas mobil MBG
-          const ufoX = mbgScreenX + 20;
-          const ufoY = mbgY - 135;
+          const ufoX = mbgScreenX + 10;
+          const ufoY = mbgY - 140;
           ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
           ctx.beginPath();
           ctx.moveTo(ufoX - 25, ufoY + 10);
-          ctx.lineTo(mbgScreenX - 55, mbgY);
-          ctx.lineTo(mbgScreenX + 55, mbgY);
+          ctx.lineTo(mbgScreenX - 60, mbgY);
+          ctx.lineTo(mbgScreenX + 60, mbgY);
           ctx.lineTo(ufoX + 25, ufoY + 10);
           ctx.closePath();
           ctx.fill();
@@ -946,20 +1123,18 @@
           ctx.arc(ufoX, ufoY - 8, 26, Math.PI, 0);
           ctx.fill();
         } else if (u.type === 'kameha' || u.type === 'kaki') {
-          // Laser Kamehameha / Hantaman dari atas
           ctx.strokeStyle = '#60a5fa';
           ctx.lineWidth = 28;
           ctx.beginPath();
           ctx.moveTo(mbgScreenX - 140, mbgY - 170);
-          ctx.lineTo(mbgScreenX + 10, mbgY - 20);
+          ctx.lineTo(mbgScreenX + 10, mbgY - 25);
           ctx.stroke();
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 12;
           ctx.stroke();
         } else if (u.type === 'meteor') {
-          // Bola Meteor Api Raksasa menggelinding (Persis Video 2!)
-          const metX = mbgScreenX + 78;
-          const metY = mbgY - 46;
+          const metX = mbgScreenX + 86;
+          const metY = mbgY - 48;
           const grad = ctx.createRadialGradient(metX, metY, 10, metX, metY, 64);
           grad.addColorStop(0, '#fef08a');
           grad.addColorStop(0.45, '#f97316');
@@ -977,7 +1152,6 @@
         }
       });
 
-      // 7. PARTIKEL ASAP & PERCIKAN
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.x += p.vx;
@@ -996,7 +1170,6 @@
 
     requestAnimationFrame(updateAndDraw);
 
-    // Kontrol Pedal Gas / Rem & Spasi
     function toggleGas(state) {
       autoGas = state;
       pedalAuto.classList.toggle('active', autoGas);
@@ -1011,7 +1184,6 @@
       }
     });
 
-    // Klik kapsul Gift di kiri/kanan untuk tes langsung
     document.querySelectorAll('.gift-pill').forEach(pill => {
       pill.addEventListener('click', () => {
         spawnLiveUnit({
@@ -1019,17 +1191,15 @@
           type: pill.dataset.type,
           label: pill.dataset.label,
           power: Number(pill.dataset.power),
-          nickname: 'TesStreamer',
+          nickname: 'TesGift',
           giftName: pill.dataset.label,
           count: 1
         });
       });
     });
 
-    // Tombol Menu & Tombol Musik
     const colTurun = document.getElementById('col-turun');
     const colNaik = document.getElementById('col-naik');
-    const spPlayer = document.getElementById('sp-player');
 
     document.getElementById('btn-toggle-ui').addEventListener('click', () => {
       const hidden = colTurun.style.display === 'none';
@@ -1042,7 +1212,7 @@
     });
 
     // ========================================================================
-    // B. SUARA BAHASA INDONESIA (TTS) + AUTO DUCKING MUSIK
+    // 3. SUARA BAHASA INDONESIA + AUTO DUCKING
     // ========================================================================
     let currentTtsAudio = null;
     let userVol = 60;
@@ -1073,7 +1243,7 @@
     }
 
     // ========================================================================
-    // C. KONEKSI SOCKET.IO KE TIKTOK LIVE @ptrgenz
+    // 4. KONEKSI SOCKET.IO KE LIVE TIKTOK @ptrgenz
     // ========================================================================
     const statusBadge = document.getElementById('live-status-badge');
     try {
@@ -1095,7 +1265,7 @@
     } catch (e) {}
 
     // ========================================================================
-    // D. SPOTIFY FULL LAGU PLAYER (1 LAGU PENUH BARU PINDAH + ANTI TABRAKAN)
+    // 5. SPOTIFY FULL LAGU PLAYER (ANTI TABRAKAN)
     // ========================================================================
     const tabId = Math.random().toString(36).slice(2);
     const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('ptrgenz_mbg_audio') : null;
@@ -1148,8 +1318,8 @@
 
     window.onYouTubeIframeAPIReady = function() {
       ytPlayer = new YT.Player('yt-bgm-frame', {
-        height: '44',
-        width: '44',
+        height: '42',
+        width: '42',
         playerVars: { autoplay: 1, controls: 0, playsinline: 1, rel: 0 },
         events: {
           onReady: () => {
@@ -1161,10 +1331,10 @@
             if (e.data === YT.PlayerState.PLAYING) {
               claimAudioMaster();
               isPlaying = true;
-              toggleBtn.innerHTML = '&#10074;&#10074;';
+              toggleBtn.textContent = 'II';
             } else if (e.data === YT.PlayerState.PAUSED) {
               isPlaying = false;
-              toggleBtn.innerHTML = '&#9654;';
+              toggleBtn.textContent = '>';
             } else if (e.data === YT.PlayerState.ENDED) {
               const dur = ytPlayer.getDuration ? ytPlayer.getDuration() : 0;
               const cur = ytPlayer.getCurrentTime ? ytPlayer.getCurrentTime() : 0;
