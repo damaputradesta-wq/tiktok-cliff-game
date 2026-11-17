@@ -984,9 +984,167 @@
     loop();
   })();
   </script>
+
 <!-- ID_TTS_PATCH_START -->
+<style>
+  #sp-player {
+    position: fixed;
+    bottom: 14px;
+    left: 14px;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(18, 18, 18, 0.92);
+    border: 1px solid rgba(29, 185, 84, 0.45);
+    border-radius: 14px;
+    padding: 8px 12px;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    min-width: 255px;
+    max-width: 315px;
+  }
+  #sp-disc {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #1db954 22%, #111 25%, #222 60%, #1db954 100%);
+    flex-shrink: 0;
+    animation: spSpin 4s linear infinite;
+    animation-play-state: paused;
+  }
+  #sp-disc.playing { animation-play-state: running; }
+  @keyframes spSpin { 100% { transform: rotate(360deg); } }
+  .sp-info { flex: 1; overflow: hidden; }
+  .sp-badge { font-size: 9px; color: #1db954; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+  #sp-title { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #sp-artist { font-size: 10px; color: #b3b3b3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp-controls { display: flex; align-items: center; gap: 5px; }
+  .sp-btn {
+    background: #282828;
+    border: none;
+    color: #fff;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sp-btn.main { background: #1db954; color: #000; font-weight: bold; }
+  #sp-vol { width: 48px; accent-color: #1db954; cursor: pointer; }
+</style>
+
+<div id="sp-player">
+  <div id="sp-disc"></div>
+  <div class="sp-info">
+    <div class="sp-badge">Spotify Live BGM</div>
+    <div id="sp-title">Memuat lagu...</div>
+    <div id="sp-artist">Klik layar untuk mulai</div>
+  </div>
+  <div class="sp-controls">
+    <button class="sp-btn" id="sp-prev" title="Sebelumnya">&#9664;</button>
+    <button class="sp-btn main" id="sp-toggle" title="Play/Pause">&#9654;</button>
+    <button class="sp-btn" id="sp-next" title="Berikutnya">&#9654;&#9654;</button>
+    <input type="range" id="sp-vol" min="0" max="1" step="0.05" value="0.35" title="Volume Musik" />
+  </div>
+</div>
+
 <script>
 (function() {
+  // --- BAGIAN 1: SPOTIFY BGM PLAYER ---
+  const defaultTracks = [
+    { title: 'Cyber Phonk Drift', artist: 'Live Gaming Beats', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+    { title: 'Neon Night Stream', artist: 'Synthwave Radio', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3' },
+    { title: 'Hype Arena Drop', artist: 'Electro Boost', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3' },
+    { title: 'Chill Waiting Lobby', artist: 'Lo-Fi Beats', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3' }
+  ];
+
+  let tracks = [...defaultTracks];
+  let idx = 0;
+  let userVol = 0.35;
+  const bgm = new Audio();
+  bgm.preload = 'auto';
+  bgm.volume = userVol;
+
+  const disc = document.getElementById('sp-disc');
+  const titleEl = document.getElementById('sp-title');
+  const artistEl = document.getElementById('sp-artist');
+  const toggleBtn = document.getElementById('sp-toggle');
+  const prevBtn = document.getElementById('sp-prev');
+  const nextBtn = document.getElementById('sp-next');
+  const volInput = document.getElementById('sp-vol');
+
+  function loadTrack(i, autoPlay) {
+    if (!tracks.length) return;
+    idx = (i + tracks.length) % tracks.length;
+    const t = tracks[idx];
+    bgm.src = t.url;
+    titleEl.textContent = t.title;
+    artistEl.textContent = t.artist;
+    if (autoPlay) playBgm();
+  }
+
+  function playBgm() {
+    bgm.play().then(() => {
+      disc.classList.add('playing');
+      toggleBtn.innerHTML = '&#10074;&#10074;';
+    }).catch(() => {});
+  }
+
+  function pauseBgm() {
+    bgm.pause();
+    disc.classList.remove('playing');
+    toggleBtn.innerHTML = '&#9654;';
+  }
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (bgm.paused) playBgm(); else pauseBgm();
+  });
+
+  nextBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    loadTrack(idx + 1, true);
+  });
+
+  prevBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    loadTrack(idx - 1, true);
+  });
+
+  volInput.addEventListener('input', (e) => {
+    userVol = parseFloat(e.target.value);
+    bgm.volume = userVol;
+  });
+
+  bgm.addEventListener('ended', () => loadTrack(idx + 1, true));
+  bgm.addEventListener('error', () => setTimeout(() => loadTrack(idx + 1, true), 1500));
+
+  fetch('http://localhost:3000/playlist')
+    .then(r => r.json())
+    .then(localFiles => {
+      if (Array.isArray(localFiles) && localFiles.length > 0) {
+        tracks = [...localFiles, ...defaultTracks];
+      }
+      loadTrack(0, true);
+    })
+    .catch(() => loadTrack(0, true));
+
+  document.addEventListener('click', function startOnce() {
+    if (bgm.paused) playBgm();
+    document.removeEventListener('click', startOnce);
+  });
+
+  function duckBgm(duck) {
+    bgm.volume = duck ? Math.min(userVol * 0.22, 0.08) : userVol;
+  }
+
+  // --- BAGIAN 2: SUARA BAHASA INDONESIA + AUTO-DUCKING ---
   let currentAudio = null;
   const origSpeak = window.speechSynthesis ? window.speechSynthesis.speak.bind(window.speechSynthesis) : null;
   const origCancel = window.speechSynthesis ? window.speechSynthesis.cancel.bind(window.speechSynthesis) : null;
@@ -1015,6 +1173,9 @@
     const voices = window.speechSynthesis.getVoices() || [];
     const idVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('id'));
     if (idVoice) utterance.voice = idVoice;
+    duckBgm(true);
+    utterance.onend = () => duckBgm(false);
+    utterance.onerror = () => duckBgm(false);
     origSpeak(utterance);
   }
 
@@ -1024,6 +1185,7 @@
         currentAudio.pause();
         currentAudio = null;
       }
+      duckBgm(false);
       if (origCancel) origCancel();
     };
 
@@ -1042,7 +1204,12 @@
       audio.playbackRate = 1.15;
       currentAudio = audio;
 
+      duckBgm(true);
+      audio.onended = () => duckBgm(false);
+      audio.onerror = () => duckBgm(false);
+
       audio.play().catch(() => {
+        duckBgm(false);
         fallbackBrowserSpeak(utterance);
       });
     };

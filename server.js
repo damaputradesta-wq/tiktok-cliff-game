@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const https = require('https');
+const fs = require('fs');
 const path = require('path');
 const { Server } = require('socket.io');
 const tiktokLib = require('tiktok-live-connector');
@@ -20,6 +21,21 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/mp3', express.static(path.join(__dirname, 'mp3')));
+
+// Endpoint Daftar Lagu Lokal dari folder mp3
+app.get('/playlist', (req, res) => {
+  const dir = path.join(__dirname, 'mp3');
+  if (!fs.existsSync(dir)) return res.json([]);
+  const files = fs.readdirSync(dir)
+    .filter(f => f.toLowerCase().endsWith('.mp3'))
+    .map(f => ({
+      title: f.replace(/\.mp3$/i, ''),
+      artist: 'Lagu Lokal (@' + 'ptrgenz' + ')',
+      url: 'http://localhost:3000/mp3/' + encodeURIComponent(f)
+    }));
+  res.json(files);
+});
 
 // Endpoint Suara Bahasa Indonesia + Auto Translate Inggris -> Indonesia
 app.get('/tts', (req, res) => {
@@ -211,7 +227,8 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log('====================================================');
-  console.log('SERVER PENANGKAP GIFT + SUARA INDONESIA AKTIF (@' + TARGET_USER + ')');
+  console.log('SERVER GIFT + SUARA INDONESIA + SPOTIFY BGM AKTIF (@' + TARGET_USER + ')');
+  console.log('Folder Lagu Sendiri: C:\\projects\\tiktok-cliff-game\\mp3');
   console.log('Link Live Studio: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1');
   console.log('====================================================');
   connectTikTokRoom();
