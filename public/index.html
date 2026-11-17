@@ -9,6 +9,51 @@
     body { width: 100vw; height: 100vh; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); display: flex; justify-content: center; align-items: center; overflow: hidden; color: #fff; }
     #stage { position: relative; width: 100%; max-width: 500px; height: 100vh; background: #070b14; overflow: hidden; box-shadow: 0 0 70px rgba(0,0,0,0.95); border-left: 2px solid #334155; border-right: 2px solid #334155; }
     canvas { width: 100%; height: 100%; display: block; }
+
+    /* Kotak Menu Harga Gift untuk Penonton Live */
+    #gift-menu {
+      position: absolute;
+      top: 104px;
+      left: 10px;
+      width: 215px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid rgba(250, 204, 21, 0.65);
+      border-radius: 12px;
+      padding: 8px 10px;
+      z-index: 20;
+      pointer-events: none;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.65);
+    }
+    .menu-title {
+      font-size: 11px;
+      font-weight: 900;
+      color: #fde047;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .menu-title img { width: 14px; height: 14px; }
+    .menu-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10.5px;
+      padding: 3px 0;
+      border-bottom: 1px dashed rgba(255,255,255,0.08);
+    }
+    .menu-row:last-child { border-bottom: none; }
+    .menu-left { display: flex; align-items: center; gap: 6px; font-weight: 700; color: #f8fafc; }
+    .menu-left img { width: 15px; height: 15px; object-fit: contain; }
+    .coin-tag { color: #38bdf8; font-weight: 900; font-size: 9.5px; }
+    .dmg-tag { background: rgba(239, 68, 68, 0.25); border: 1px solid #ef4444; color: #fca5a5; font-weight: 900; font-size: 9.5px; padding: 1px 5px; border-radius: 6px; }
+    .boost-tag { background: rgba(16, 185, 129, 0.25); border: 1px solid #10b981; color: #6ee7b7; font-weight: 900; font-size: 9.5px; padding: 1px 5px; border-radius: 6px; }
+
+    /* Panel Kontrol Bawah */
     #ui-bottom { position: absolute; bottom: 8px; left: 8px; right: 8px; background: rgba(15, 23, 42, 0.95); border: 1.5px solid #475569; border-radius: 14px; padding: 8px; z-index: 30; backdrop-filter: blur(10px); box-shadow: 0 10px 25px rgba(0,0,0,0.7); }
     .row { display: flex; gap: 6px; margin-bottom: 6px; align-items: center; }
     .inp { flex: 1; background: #020617; border: 1.5px solid #38bdf8; color: #fff; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; outline: none; }
@@ -20,9 +65,74 @@
   </style>
 </head>
 <body>
-  <!-- REAL_HD_1794886279598 -->
+  <!-- MENU_HD_1794886946327 -->
   <div id="stage">
     <canvas id="gameCanvas" width="500" height="900"></canvas>
+
+    <!-- Kotak Daftar Harga Gift Otomatis untuk Penonton -->
+    <div id="gift-menu">
+      <div class="menu-title">
+        <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f381.png" alt="" />
+        <span>DAFTAR TANTANGAN GIFT LIVE</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/2764.png" alt="" />
+          <div>Tap-Tap / Komen<br/><span class="coin-tag">Bantu Pemanjat</span></div>
+        </div>
+        <span class="boost-tag">+20m Jetpack</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f339.png" alt="" />
+          <div>Mawar / Gift 1 Koin<br/><span class="coin-tag">3x Gergaji Baja</span></div>
+        </div>
+        <span class="dmg-tag">-45m</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f9ca.png" alt="" />
+          <div>Es Krim (2-4 Koin)<br/><span class="coin-tag">Balok Es Pembeku</span></div>
+        </div>
+        <span class="dmg-tag">-50m</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/26a1.png" alt="" />
+          <div>Jari Hati (5-9 Koin)<br/><span class="coin-tag">Samberan Petir</span></div>
+        </div>
+        <span class="dmg-tag">-55m</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4a3.png" alt="" />
+          <div>Rosa / Bom (10-14 Koin)<br/><span class="coin-tag">Bom Waktu Tempel</span></div>
+        </div>
+        <span class="dmg-tag">-85m</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f528.png" alt="" />
+          <div>Parfum (15-29 Koin)<br/><span class="coin-tag">Ayunan Palu Thor</span></div>
+        </div>
+        <span class="dmg-tag">-95m</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f369.png" alt="" />
+          <div>Donat (30-99 Koin)<br/><span class="coin-tag">Boss UFO + Donat</span></div>
+        </div>
+        <span class="dmg-tag">-120m</span>
+      </div>
+      <div class="menu-row">
+        <div class="menu-left">
+          <img src="https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f981.png" alt="" />
+          <div>Gift 100+ Koin (Sultan)<br/><span class="coin-tag">Kiamat Meteor + Lava</span></div>
+        </div>
+        <span class="dmg-tag">-180m+</span>
+      </div>
+    </div>
+
     <div id="ui-bottom">
       <div class="row">
         <input class="inp" id="tiktokUser" placeholder="Ketik @username TikTok kamu lalu klik Hubungkan Live..." />
@@ -39,7 +149,6 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Koleksi Sprite Gambar HD Resmi (Twemoji CDN) agar tidak pernah muncul '??'
     const SPRITE_URLS = {
       rose: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f339.png',
       donut: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f369.png',
@@ -74,7 +183,6 @@
       return img;
     }
 
-    // Sound Synthesizer & Suara Komentator
     let audioCtx = null;
     function playSfx(f1, f2, dur, type) {
       try {
@@ -102,7 +210,6 @@
       } catch (e) {}
     }
 
-    // State Permainan
     let alt = 85, targetAlt = 85, wins = 0, shield = 40, shake = 0, flash = 0, lavaY = 62, frame = 0;
     let liveStatusText = 'SIAP MENERIMA GIFT ASLI TIKTOK LIVE';
     let liveStateColor = '#38bdf8';
@@ -115,7 +222,7 @@
     const particles = [];
     const popups = [];
 
-    const hero = { x: 250, y: 500, tx: 250, phase: 0, jetpack: 0, freeze: 0, bomb: null, hurt: 0 };
+    const hero = { x: 280, y: 520, tx: 280, phase: 0, jetpack: 0, freeze: 0, bomb: null, hurt: 0 };
     const stars = Array.from({ length: 60 }, () => ({ x: Math.random() * 500, y: Math.random() * 900, s: Math.random() * 2.5 + 0.8 }));
     const clouds = Array.from({ length: 6 }, (_, i) => ({ x: Math.random() * 440, y: i * 150, w: 90 + Math.random() * 60, spd: 0.25 + Math.random() * 0.3 }));
     const rockHolds = Array.from({ length: 22 }, (_, i) => ({
@@ -169,7 +276,7 @@
       playSfx(250, 760, 0.24, 'sawtooth');
       spawnExplosion(hero.x, hero.y + 32, '#38bdf8', 18);
       addPopup(hero.x, hero.y - 30, '+' + pwr + 'm JETPACK!', '#4ade80');
-      feed.unshift({ txt: '@' + user + ' bantu Jetpack +' + pwr + 'm', c: '#4ade80', sprite: sprites.rocket, avatar: getExternalImage(avatarUrl) });
+      feed.unshift({ txt: '@' + user + ' +' + pwr + 'm', c: '#4ade80', sprite: sprites.rocket, avatar: getExternalImage(avatarUrl) });
       if (feed.length > 5) feed.pop();
     }
 
@@ -177,10 +284,10 @@
       { id: 'saw', sprite: 'rose', gift: 'Mawar (1 Koin)', title: 'GERGAJI BAJA BERDURI', pwr: 45 },
       { id: 'donut', sprite: 'donut', gift: 'Donat (30 Koin)', title: 'DONAT RAKSASA PANTUL', pwr: 70 },
       { id: 'bolt', sprite: 'bolt', gift: 'Jari Hati (5 Koin)', title: 'SAMBERAN PETIR LASER', pwr: 55 },
-      { id: 'ice', sprite: 'ice', gift: 'Es Krim (1 Koin)', title: 'BADAI ES PEMBEKU', pwr: 50 },
+      { id: 'ice', sprite: 'ice', gift: 'Es Krim (2 Koin)', title: 'BADAI ES PEMBEKU', pwr: 50 },
       { id: 'bomb', sprite: 'bomb', gift: 'Bom Waktu (10 Koin)', title: 'BOM TEMPEL HITUNG MUNDUR', pwr: 85 },
       { id: 'hammer', sprite: 'hammer', gift: 'Palu Thor (20 Koin)', title: 'AYUNAN PALU RAKSASA', pwr: 95 },
-      { id: 'ufo', sprite: 'ufo', gift: 'Roket (100 Koin)', title: 'INVASI BOSS UFO LASER', pwr: 120 },
+      { id: 'ufo', sprite: 'ufo', gift: 'Roket (50 Koin)', title: 'INVASI BOSS UFO LASER', pwr: 120 },
       { id: 'meteor', sprite: 'lion', gift: 'Singa Sultan', title: 'KIAMAT METEOR & TSUNAMI LAVA', pwr: 180 }
     ];
 
@@ -202,7 +309,7 @@
       };
 
       feed.unshift({
-        txt: '@' + u + ' (' + giftLabel + ') -> ' + base.title,
+        txt: '@' + u + ' (' + giftLabel.split(' ')[0] + ') -' + pwr + 'm',
         c: '#fca5a5',
         sprite: customGiftImg || sprites[base.sprite],
         avatar: avatarImg
@@ -218,7 +325,7 @@
             kind: base.id,
             sprite: customGiftImg || sprites[base.sprite],
             avatar: avatarImg,
-            x: 115 + Math.random() * 270,
+            x: 140 + Math.random() * 245,
             y: -45 - i * 85,
             vx: (i % 2 === 0 ? 5.5 : -5.5),
             vy: 7.2,
@@ -228,10 +335,10 @@
             pwr: pwr * 0.5
           });
         }
-        hero.tx = 120 + Math.random() * 260;
+        hero.tx = 230 + Math.random() * 145;
       } else if (base.id === 'bolt') {
         hazards.push({ kind: 'bolt', x: hero.x, timer: 42, user: u, pwr: pwr });
-        hero.tx = hero.x > 250 ? 135 : 365;
+        hero.tx = hero.x > 290 ? 235 : 375;
       } else if (base.id === 'ice') {
         hero.freeze = 100;
         spawnExplosion(hero.x, hero.y, '#67e8f9', 30);
@@ -239,9 +346,9 @@
       } else if (base.id === 'bomb') {
         hero.bomb = { timer: 135, pwr: pwr, hp: 3, user: u };
       } else if (base.id === 'hammer') {
-        hazards.push({ kind: 'hammer', side: Math.random() > 0.5 ? 1 : -1, ang: -1.5, y: hero.y, user: u, pwr: pwr, hit: false });
+        hazards.push({ kind: 'hammer', side: -1, ang: -1.5, y: hero.y, user: u, pwr: pwr, hit: false });
       } else if (base.id === 'ufo') {
-        hazards.push({ kind: 'ufo', x: 250, y: 138, vx: 4.5, timer: 145, user: u, pwr: pwr });
+        hazards.push({ kind: 'ufo', x: 290, y: 138, vx: 4.2, timer: 145, user: u, pwr: pwr });
       } else if (base.id === 'meteor') {
         lavaY = 195;
         for (let i = 0; i < 6; i++) {
@@ -249,7 +356,7 @@
             kind: 'meteor',
             sprite: customGiftImg || sprites.meteor,
             avatar: avatarImg,
-            x: 100 + Math.random() * 300,
+            x: 120 + Math.random() * 280,
             y: -55 - i * 85,
             vx: (Math.random() - 0.5) * 4,
             vy: 11.2,
@@ -262,7 +369,6 @@
       }
     }
 
-    // Panel Tombol Tes Manual & Koneksi Real Live
     const grid = document.getElementById('btnGrid');
     function addGridBtn(label, spriteKey, bg, onClick, span4) {
       const b = document.createElement('button');
@@ -279,14 +385,13 @@
       grid.appendChild(b);
     }
 
-    addGridBtn('JETPACK', 'rocket', '#059669', () => triggerBoost('Penonton_Live', 30));
+    addGridBtn('JETPACK', 'rocket', '#059669', () => triggerBoost('Penonton_Live', 20));
     const btnColors = { saw: '#d97706', donut: '#db2777', bolt: '#0284c7', ice: '#0891b2', bomb: '#dc2626', hammer: '#9333ea', ufo: '#4f46e5' };
     GIFT_CATALOG.slice(0, 7).forEach((g) => {
       addGridBtn(g.gift.split(' ')[0].toUpperCase(), g.sprite, btnColors[g.id], () => triggerChallenge({ id: g.id, user: 'Tes_Gift', giftName: g.gift, pwr: g.pwr }));
     });
     addGridBtn('TES GIFT SINGA SULTAN (KIAMAT METEOR + LAVA)', 'lion', 'linear-gradient(90deg,#ef4444,#f97316)', () => triggerChallenge({ id: 'meteor', user: 'Sultan_TikTok', giftName: 'Singa Sultan', pwr: 180 }), true);
 
-    // Toggle Bot Simulasi (Default MATI agar khusus Real Gift)
     const btnSim = document.getElementById('btnSim');
     btnSim.onclick = () => {
       simBotActive = !simBotActive;
@@ -298,14 +403,13 @@
     setInterval(() => {
       if (!simBotActive) return;
       const u = FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
-      if (Math.random() < 0.35) triggerBoost(u, 25);
+      if (Math.random() < 0.35) triggerBoost(u, 20);
       else {
         const pick = GIFT_CATALOG[Math.floor(Math.random() * GIFT_CATALOG.length)];
         triggerChallenge({ id: pick.id, user: u, giftName: pick.gift, pwr: pick.pwr });
       }
     }, 2400);
 
-    // Koneksi ke Jembatan Gift Asli TikTok Live (Socket.IO + TikFinity WebSocket)
     let socket = null;
     function connectToTikTok(username) {
       const clean = (username || '').replace('@', '').trim();
@@ -338,7 +442,6 @@
       } catch (e) {}
     }
 
-    // Dukungan Otomatis TikFinity WebSocket (ws://localhost:21213) jika dipakai bersama TikTok Studio
     try {
       const tfWs = new WebSocket('ws://localhost:21213/');
       tfWs.onmessage = (msg) => {
@@ -368,14 +471,12 @@
     if (urlParams.get('user')) connectToTikTok(urlParams.get('user'));
     if (urlParams.get('live') === '1') document.getElementById('ui-bottom').style.display = 'none';
 
-    // Fungsi Menggambar Roda Gergaji / Meteor / Donat HD
     function drawHazardObject(h) {
       ctx.save();
       ctx.translate(h.x, h.y);
       ctx.rotate(h.rot);
 
       if (h.kind === 'saw') {
-        // Gerigi Gergaji Baja 3D
         const teeth = 12;
         ctx.fillStyle = '#94a3b8';
         ctx.beginPath();
@@ -417,13 +518,11 @@
         ctx.fill();
       }
 
-      // Gambar Sprite Asli di Tengah Objek (Bukan Teks '??')
       if (h.sprite && h.sprite.complete && h.sprite.naturalWidth > 0) {
         ctx.drawImage(h.sprite, -18, -18, 36, 36);
       }
       ctx.restore();
 
-      // Badge Nama & Foto Profil Pengirim Gift di Atas Rintangan
       ctx.save();
       const tagW = Math.max(88, h.user.length * 7 + 26);
       ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
@@ -444,19 +543,16 @@
       ctx.restore();
     }
 
-    // Fungsi Menggambar Karakter Pemanjat HD
     function drawClimberHero(x, y) {
       ctx.save();
       ctx.translate(x, y);
 
-      // Tali Kawat Baja ke Puncak
       ctx.strokeStyle = '#64748b';
       ctx.lineWidth = 3;
       ctx.setLineDash([6, 4]);
       ctx.beginPath(); ctx.moveTo(0, -28); ctx.lineTo(0, -180); ctx.stroke();
       ctx.setLineDash([]);
 
-      // Efek Semburan Api Jetpack Ganda
       if (hero.jetpack > 0) {
         hero.jetpack--;
         const flameH = 55 + Math.random() * 30;
@@ -471,7 +567,6 @@
         ctx.fill();
       }
 
-      // Kubah Perisai Energi
       if (shield > 0) {
         const sg = ctx.createRadialGradient(0, 0, 15, 0, 0, 46);
         sg.addColorStop(0, 'rgba(56, 189, 248, 0.05)');
@@ -483,12 +578,10 @@
         ctx.stroke();
       }
 
-      // Tabung Jetpack di Punggung
       ctx.fillStyle = '#475569';
       ctx.fillRect(-19, -10, 8, 26);
       ctx.fillRect(11, -10, 8, 26);
 
-      // Jubah Cyber Merah Berkibar
       const capeWave = Math.sin(hero.phase * 2) * 10;
       ctx.fillStyle = '#e11d48';
       ctx.beginPath();
@@ -499,7 +592,6 @@
       ctx.closePath();
       ctx.fill();
 
-      // Gerakan Tangan & Kaki Memanjat
       const sw = Math.sin(hero.phase) * 16;
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 8;
@@ -511,7 +603,6 @@
       ctx.moveTo(14, -6);  ctx.lineTo(28, -26 - sw);
       ctx.stroke();
 
-      // Armor Dada
       ctx.fillStyle = hero.hurt > 0 ? '#ef4444' : '#0284c7';
       ctx.beginPath();
       ctx.roundRect(-15, -14, 30, 30, 7);
@@ -520,24 +611,20 @@
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Inti Energi di Dada
       ctx.fillStyle = '#fde047';
       ctx.beginPath(); ctx.arc(0, 1, 5, 0, Math.PI * 2); ctx.fill();
 
-      // Helm Cyber Ninja
       ctx.fillStyle = '#0f172a';
       ctx.beginPath(); ctx.arc(0, -26, 17, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = '#38bdf8';
       ctx.lineWidth = 2.5;
       ctx.stroke();
 
-      // Kaca Visor Menyala
       ctx.fillStyle = hero.jetpack > 0 ? '#fde047' : '#22d3ee';
       ctx.beginPath();
       ctx.roundRect(-11, -30, 22, 7, 3);
       ctx.fill();
 
-      // Bongkahan Es Saat Dibekukan
       if (hero.freeze > 0) {
         ctx.fillStyle = 'rgba(103, 232, 249, 0.55)';
         ctx.strokeStyle = '#cffafe';
@@ -546,7 +633,6 @@
         ctx.strokeRect(-32, -48, 64, 92);
       }
 
-      // Bom Waktu Menempel di Dada
       if (hero.bomb) {
         ctx.fillStyle = '#111827';
         ctx.beginPath(); ctx.arc(0, 4, 15, 0, Math.PI * 2); ctx.fill();
@@ -560,7 +646,6 @@
       ctx.restore();
     }
 
-    // Loop Utama 60 FPS
     function loop() {
       frame++;
       if (hero.freeze > 0) {
@@ -598,7 +683,6 @@
         shake *= 0.88;
       }
 
-      // 1. Langit Malam & Bintang Paralaks
       const sky = ctx.createLinearGradient(0, 0, 0, 900);
       sky.addColorStop(0, '#020617');
       sky.addColorStop(0.55, '#0f172a');
@@ -609,7 +693,6 @@
       ctx.fillStyle = '#fff';
       stars.forEach((s) => ctx.fillRect(s.x, (s.y + alt * 2.5) % 900, s.s, s.s));
 
-      // Awan Bergerak
       ctx.fillStyle = 'rgba(148, 163, 184, 0.12)';
       clouds.forEach((c) => {
         c.x = (c.x + c.spd) % 520;
@@ -619,7 +702,6 @@
         ctx.fill();
       });
 
-      // 2. Dinding Tebing 3D Berlapis
       ctx.fillStyle = '#090d16';
       ctx.fillRect(0, 0, 72, 900);
       ctx.fillRect(428, 0, 72, 900);
@@ -633,7 +715,6 @@
       ctx.fillStyle = cliffGrad;
       ctx.fillRect(72, 0, 356, 900);
 
-      // Pijakan Batu 3D & Kristal Energi
       const scrollY = (alt * 16) % 900;
       rockHolds.forEach((r) => {
         const ry = (r.y + scrollY) % 900;
@@ -656,18 +737,16 @@
 
       // Bar Progres Ketinggian di Sisi Kanan
       ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-      ctx.fillRect(444, 125, 18, 500);
+      ctx.fillRect(468, 250, 16, 420);
       ctx.strokeStyle = '#475569';
-      ctx.strokeRect(444, 125, 18, 500);
-      const fillH = Math.min(500, (alt / 1000) * 500);
+      ctx.strokeRect(468, 250, 16, 420);
+      const fillH = Math.min(420, (alt / 1000) * 420);
       ctx.fillStyle = '#38bdf8';
-      ctx.fillRect(446, 625 - fillH, 14, fillH);
-      if (sprites.crown.complete) ctx.drawImage(sprites.crown, 443, 102, 20, 20);
+      ctx.fillRect(470, 670 - fillH, 12, fillH);
+      if (sprites.crown.complete) ctx.drawImage(sprites.crown, 466, 226, 20, 20);
 
-      // 3. Karakter Pemanjat
       drawClimberHero(hero.x, hero.y);
 
-      // 4. Rintangan & Tantangan Gift
       for (let i = hazards.length - 1; i >= 0; i--) {
         const h = hazards[i];
         if (h.kind === 'saw' || h.kind === 'donut' || h.kind === 'meteor') {
@@ -687,7 +766,7 @@
           if (h.y > 940) hazards.splice(i, 1);
         } else if (h.kind === 'ufo') {
           h.timer--; h.x += h.vx;
-          if (h.x < 125 || h.x > 375) h.vx *= -1;
+          if (h.x < 140 || h.x > 380) h.vx *= -1;
           ctx.fillStyle = '#7c3aed';
           ctx.beginPath(); ctx.ellipse(h.x, h.y, 52, 18, 0, 0, Math.PI * 2); ctx.fill();
           ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2; ctx.stroke();
@@ -733,7 +812,6 @@
         }
       }
 
-      // 5. Partikel & Popup Damage
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i]; p.x += p.vx; p.y += p.vy; p.life -= 0.04;
         if (p.life <= 0) { particles.splice(i, 1); continue; }
@@ -751,7 +829,6 @@
       }
       ctx.globalAlpha = 1;
 
-      // 6. Lava Bergelombang di Dasar Tebing
       const lavaGrad = ctx.createLinearGradient(0, 900 - lavaY, 0, 900);
       lavaGrad.addColorStop(0, '#fde047');
       lavaGrad.addColorStop(0.25, '#f97316');
@@ -759,7 +836,7 @@
       ctx.fillStyle = lavaGrad;
       ctx.fillRect(72, 900 - lavaY, 356, lavaY);
 
-      // 7. HUD Atas dengan Ikon Sprite HD (Tanpa '??')
+      // HUD Atas
       ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
       ctx.beginPath(); ctx.roundRect(10, 10, 232, 86, 12); ctx.fill();
       ctx.beginPath(); ctx.roundRect(258, 10, 232, 86, 12); ctx.fill();
@@ -782,37 +859,37 @@
       ctx.fillStyle = '#4ade80'; ctx.font = 'bold 11px sans-serif';
       ctx.fillText('MENANG: ' + wins + 'x | SHIELD: ' + Math.round(shield) + '%', 270, 80);
 
-      // 8. Live Feed Riwayat Gift + Gambar Sprite Asli
+      // Live Feed Riwayat Gift di Sisi Kanan (Supaya tidak bertumpuk dengan Menu Harga di Kiri)
       feed.forEach((item, idx) => {
-        const fy = 104 + idx * 25;
+        const fy = 104 + idx * 24;
         ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
-        ctx.beginPath(); ctx.roundRect(10, fy, 320, 22, 6); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(258, fy, 232, 21, 6); ctx.fill();
         const iconImg = item.avatar || item.sprite;
         if (iconImg && iconImg.complete && iconImg.naturalWidth > 0) {
-          ctx.drawImage(iconImg, 15, fy + 3, 16, 16);
+          ctx.drawImage(iconImg, 263, fy + 2.5, 16, 16);
         }
         ctx.fillStyle = item.c;
-        ctx.font = 'bold 11px sans-serif';
-        ctx.fillText(item.txt.slice(0, 42), 36, fy + 15);
+        ctx.font = 'bold 10.5px sans-serif';
+        ctx.fillText(item.txt.slice(0, 30), 283, fy + 14);
       });
 
-      // 9. Banner Tengah Saat Ada Gift Masuk (Dengan Gambar Gift Asli)
+      // Banner Tengah Saat Ada Gift Masuk
       if (alertBanner.timer > 0) {
         alertBanner.timer--;
         ctx.fillStyle = 'rgba(185, 28, 28, 0.96)';
-        ctx.beginPath(); ctx.roundRect(30, 235, 440, 82, 16); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(30, 395, 440, 80, 16); ctx.fill();
         ctx.strokeStyle = '#fde047'; ctx.lineWidth = 3;
-        ctx.strokeRect(30, 235, 440, 82);
+        ctx.strokeRect(30, 395, 440, 80);
 
         const bImg = alertBanner.customImg || sprites[alertBanner.spriteKey];
         if (bImg && bImg.complete && bImg.naturalWidth > 0) {
-          ctx.drawImage(bImg, 46, 252, 48, 48);
+          ctx.drawImage(bImg, 46, 411, 48, 48);
         }
 
         ctx.fillStyle = '#fde047'; ctx.font = '900 17px sans-serif'; ctx.textAlign = 'left';
-        ctx.fillText(alertBanner.title, 106, 270);
+        ctx.fillText(alertBanner.title, 106, 428);
         ctx.fillStyle = '#fff'; ctx.font = 'bold 13px sans-serif';
-        ctx.fillText(alertBanner.sub, 106, 296);
+        ctx.fillText(alertBanner.sub, 106, 454);
       }
 
       if (flash > 0) {
