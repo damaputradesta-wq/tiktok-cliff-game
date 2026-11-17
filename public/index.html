@@ -984,5 +984,71 @@
     loop();
   })();
   </script>
+<!-- ID_TTS_PATCH_START -->
+<script>
+(function() {
+  let currentAudio = null;
+  const origSpeak = window.speechSynthesis ? window.speechSynthesis.speak.bind(window.speechSynthesis) : null;
+  const origCancel = window.speechSynthesis ? window.speechSynthesis.cancel.bind(window.speechSynthesis) : null;
+
+  function toIndonesianText(text) {
+    if (!text) return '';
+    return String(text)
+      .replace(/\bsent\b/gi, 'mengirim')
+      .replace(/\bjoined\b/gi, 'bergabung')
+      .replace(/\bliked\b/gi, 'menyukai live')
+      .replace(/\bthank you\b/gi, 'terima kasih')
+      .replace(/\bthanks\b/gi, 'makasih')
+      .replace(/\bwatch out\b/gi, 'awas hati-hati')
+      .replace(/\bdanger\b/gi, 'bahaya')
+      .replace(/\bvictory\b/gi, 'menang')
+      .replace(/\bwinner\b/gi, 'pemenang')
+      .replace(/\bgame over\b/gi, 'permainan berakhir')
+      .replace(/\blevel up\b/gi, 'naik level')
+      .replace(/\bboost\b/gi, 'dorongan')
+      .replace(/\bspawned\b/gi, 'memunculkan');
+  }
+
+  function fallbackBrowserSpeak(utterance) {
+    if (!origSpeak || !utterance) return;
+    utterance.lang = 'id-ID';
+    const voices = window.speechSynthesis.getVoices() || [];
+    const idVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('id'));
+    if (idVoice) utterance.voice = idVoice;
+    origSpeak(utterance);
+  }
+
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel = function() {
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
+      if (origCancel) origCancel();
+    };
+
+    window.speechSynthesis.speak = function(utterance) {
+      if (!utterance || !utterance.text) return;
+      const cleanText = toIndonesianText(utterance.text);
+      utterance.text = cleanText;
+      utterance.lang = 'id-ID';
+
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
+
+      const audio = new Audio('http://localhost:3000/tts?text=' + encodeURIComponent(cleanText));
+      audio.playbackRate = 1.15;
+      currentAudio = audio;
+
+      audio.play().catch(() => {
+        fallbackBrowserSpeak(utterance);
+      });
+    };
+  }
+})();
+</script>
+<!-- ID_TTS_PATCH_END -->
 </body>
 </html>

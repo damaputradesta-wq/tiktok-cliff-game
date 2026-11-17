@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const { Server } = require('socket.io');
 const tiktokLib = require('tiktok-live-connector');
@@ -19,6 +20,36 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Endpoint Suara Bahasa Indonesia + Auto Translate Inggris -> Indonesia
+app.get('/tts', (req, res) => {
+  const rawText = (req.query.text || '').toString().trim();
+  if (!rawText) return res.status(400).end();
+
+  const trUrl = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=id&dt=t&q=' + encodeURIComponent(rawText);
+  https.get(trUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (trRes) => {
+    let body = '';
+    trRes.on('data', (chunk) => body += chunk);
+    trRes.on('end', () => {
+      let idText = rawText;
+      try {
+        const parsed = JSON.parse(body);
+        if (parsed && parsed[0]) {
+          idText = parsed[0].map(item => item[0]).join('');
+        }
+      } catch (e) {}
+
+      const cleanText = idText.slice(0, 200);
+      const ttsUrl = 'https://translate.googleapis.com/translate_tts?client=gtx&ie=UTF-8&tl=id&q=' + encodeURIComponent(cleanText);
+
+      https.get(ttsUrl, { headers: { 'User-Agent': 'Mozilla/5.0' } }, (audioRes) => {
+        res.setHeader('Content-Type', 'audio/mpeg');
+        res.setHeader('Cache-Control', 'no-cache');
+        audioRes.pipe(res);
+      }).on('error', () => res.status(500).end());
+    });
+  }).on('error', () => res.status(500).end());
+});
 
 const TARGET_USER = 'ptrgenz';
 let activeConnection = null;
@@ -180,7 +211,7 @@ io.on('connection', (socket) => {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log('====================================================');
-  console.log('SERVER PENANGKAP GIFT TIKTOK AKTIF (@' + TARGET_USER + ')');
+  console.log('SERVER PENANGKAP GIFT + SUARA INDONESIA AKTIF (@' + TARGET_USER + ')');
   console.log('Link Live Studio: https://damaputradesta-wq.github.io/tiktok-cliff-game/?user=ptrgenz&live=1');
   console.log('====================================================');
   connectTikTokRoom();
